@@ -1,0 +1,104 @@
+@extends('admin.layout.main_layout')
+@section('title', 'Admin | Company List')
+@section('content')
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12 col-lg-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <div class="header-title">
+                                <h5 class="card-title">Company List</h5>
+                            </div>
+                            <div class="header-action">
+                                <a class="btn btn-primary" href="{{ route('admin.create_company') }}" role="button"><i
+                                        class="bi bi-plus"></i> Add Company</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="datatable" class="table data-table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Address</th>
+                                            <th>Country</th>
+                                            <th>State</th>
+                                            <th>City</th>
+                                            <th>Pincode</th>
+                                            <th>Image</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($companies as $item)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $item->user->name ?? '' }}</td>
+                                                <td>{{ $item->user->email ?? '' }}</td>
+                                                <td>{{ $item->phone_number ?? '' }}</td>
+                                                <td>{{ $item->address ?? '' }}</td>
+                                                <td>{{ $item->country->name ?? '' }}</td>
+                                                <td>{{ $item->state->name ?? '' }}</td>
+                                                <td>{{ $item->city->name ?? '' }}</td>
+                                                <td>{{ $item->pincode ?? '' }}</td>
+                                                <td>
+                                                    @if ($item->image)
+                                                        <img src="{{ asset('company_images/' . $item->image) }}"
+                                                            alt="Company Image"
+                                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                                    @endif
+                                                <td>
+                                                    <a class="btn btn-primary btn-sm mb-2"
+                                                        href="{{ route('admin.edit_company', $item->id) }}" role="button">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+                                                    <a class="btn btn-danger btn-sm delete-confirm mb-2"
+                                                        href="javascript:void(0)" data-id="{{ $item->id }}"
+                                                        role="button">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-confirm').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var id = this.getAttribute('data-id');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href =
+                                "{{ URL::to('admin/company/destroy') }}/" + id;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+@endsection
