@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
-use App\Models\Country;
+use App\Models\State;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -13,14 +13,14 @@ class CompanyController extends Controller
 {
     public function company()
     {
-        $companies = Company::with('user', 'country', 'state', 'city')->get();
+        $companies = Company::with('user', 'state', 'city')->latest()->get();
         return view('admin.company.list_company', compact('companies'));
     }
 
     public function create_company()
     {
-        $countries = Country::all();
-        return view('admin.company.add_company', compact('countries'));
+        $states = State::all();
+        return view('admin.company.add_company', compact('states'));
     }
 
     public function store_company(Request $request)
@@ -32,10 +32,12 @@ class CompanyController extends Controller
             'phone_number' => 'required|string|max:15',
             'address' => 'required|string',
             'alternate_address' => 'nullable|string',
-            'country' => 'required|integer',
             'state' => 'required|integer',
             'city' => 'required|integer',
             'pincode' => 'required|string|max:10',
+            'gst_no' => 'nullable|string|max:50',
+            'msme_no' => 'nullable|string|max:50',
+            'state_code' => 'nullable|string|max:10',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -43,8 +45,8 @@ class CompanyController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']), // Secure hash
-                'ipass' => $validated['password'], // optional - remove if not needed
+                'password' => Hash::make($validated['password']),
+                'ipass' => $validated['password'],
                 'role' => 'company',
             ]);
 
@@ -60,10 +62,12 @@ class CompanyController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'address' => $validated['address'],
                 'alternate_address' => $validated['alternate_address'] ?? null,
-                'country_id' => $request->country,
                 'state_id' => $request->state,
                 'city_id' => $request->city,
                 'pincode' => $validated['pincode'],
+                'gst_no' => $validated['gst_no'] ?? null,
+                'msme_no' => $validated['msme_no'] ?? null,
+                'state_code' => $validated['state_code'] ?? null,
                 'image' => $imageName,
             ]);
 
@@ -78,8 +82,8 @@ class CompanyController extends Controller
     public function edit_company($id)
     {
         $company = Company::find($id);
-        $countries = Country::all();
-        return view('admin.company.edit_company', compact('company', 'countries'));
+        $states = State::all();
+        return view('admin.company.edit_company', compact('company','states'));
     }
 
     public function update_company(Request $request, $id)
@@ -94,10 +98,12 @@ class CompanyController extends Controller
             'phone_number' => 'required|string|max:15',
             'address' => 'required|string',
             'alternate_address' => 'nullable|string',
-            'country' => 'required|integer',
             'state' => 'required|integer',
             'city' => 'required|integer',
             'pincode' => 'required|string|max:10',
+            'gst_no' => 'nullable|string|max:50',
+            'msme_no' => 'nullable|string|max:50',
+            'state_code' => 'nullable|string|max:10',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -125,10 +131,12 @@ class CompanyController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'address' => $validated['address'],
                 'alternate_address' => $validated['alternate_address'] ?? null,
-                'country_id' => $request->country,
                 'state_id' => $request->state,
                 'city_id' => $request->city,
                 'pincode' => $validated['pincode'],
+                'gst_no' => $validated['gst_no'] ?? null,
+                'msme_no' => $validated['msme_no'] ?? null,
+                'state_code' => $validated['state_code'] ?? null,
                 'image' => $imageName,
             ]);
 

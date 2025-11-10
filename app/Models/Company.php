@@ -14,21 +14,18 @@ class Company extends Model
         'phone_number',
         'address',
         'alternate_address',
-        'country_id',
         'state_id',
         'city_id',
         'pincode',
         'image',
+        'gst_no',
+        'msme_no',
+        'state_code',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-    
-    public function country()
-    {
-        return $this->belongsTo(Country::class);
     }
 
     public function state()

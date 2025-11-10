@@ -20,9 +20,7 @@ Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('check-login', [AuthController::class, 'checkLogin'])->name('check.login');
 Route::get('logout', [AuthController::class, 'Logout'])->name('logout');
 
-Route::get('/get-states/{country_id}', [DashboardController::class, 'getStates'])->name('get.states');
 Route::get('/get-cities/{state_id}', [DashboardController::class, 'getCities'])->name('get.cities');
-
 
 Route::middleware(['auth', 'checkRole:admin'])->group(function () {
 

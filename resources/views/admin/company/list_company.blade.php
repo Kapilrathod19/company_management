@@ -26,11 +26,14 @@
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone</th>
-                                            <th>Address</th>
-                                            <th>Country</th>
+                                            <th>Office Address</th>
+                                            <th>Factory Address</th>
                                             <th>State</th>
                                             <th>City</th>
                                             <th>Pincode</th>
+                                            <th>GST Number</th>
+                                            <th>MSME Number</th>
+                                            <th>State Code</th>
                                             <th>Image</th>
                                             <th>Action</th>
                                         </tr>
@@ -43,10 +46,13 @@
                                                 <td>{{ $item->user->email ?? '' }}</td>
                                                 <td>{{ $item->phone_number ?? '' }}</td>
                                                 <td>{{ $item->address ?? '' }}</td>
-                                                <td>{{ $item->country->name ?? '' }}</td>
+                                                <td>{{ $item->alternate_address ?? '' }}</td>
                                                 <td>{{ $item->state->name ?? '' }}</td>
                                                 <td>{{ $item->city->name ?? '' }}</td>
                                                 <td>{{ $item->pincode ?? '' }}</td>
+                                                <td>{{ $item->gst_no ?? '' }}</td>
+                                                <td>{{ $item->msme_no ?? '' }}</td>
+                                                <td>{{ $item->state_code ?? '' }}</td>
                                                 <td>
                                                     @if ($item->image)
                                                         <img src="{{ asset('company_images/' . $item->image) }}"

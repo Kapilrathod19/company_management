@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use App\Models\Company;
-use App\Models\Country;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,11 +21,10 @@ class CompanyDashboardController extends Controller
         $user = Auth::user();
         $company = Company::where('user_id', $user->id)->first();
 
-        $countries = Country::all();
-        $states = State::where('country_id', $company->country_id ?? $countries->first()->id)->get();
+        $states = State::all();
         $cities = City::where('state_id', $company->state_id ?? $states->first()->id)->get();
 
-        return view('company.company_profile', compact('user', 'company', 'countries', 'states', 'cities'));
+        return view('company.company_profile', compact('user', 'company', 'states', 'cities'));
     }
 
     public function profile_store(Request $request)
@@ -37,10 +35,12 @@ class CompanyDashboardController extends Controller
             'phone_number' => 'required|string|max:15',
             'address' => 'required|string',
             'alternate_address' => 'nullable|string',
-            'country' => 'required|integer',
             'state' => 'required|integer',
             'city' => 'required|integer',
             'pincode' => 'required|string|max:10',
+            'gst_no' => 'nullable|string|max:50',
+            'msme_no' => 'nullable|string|max:50',
+            'state_code' => 'nullable|string|max:10',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -67,10 +67,12 @@ class CompanyDashboardController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'alternate_address' => $request->alternate_address,
-            'country_id' => $request->country,
             'state_id' => $request->state,
             'city_id' => $request->city,
             'pincode' => $request->pincode,
+            'gst_no' => $request->gst_no,
+            'msme_no' => $request->msme_no,
+            'state_code' => $request->state_code,
             'image' => $imageName,
         ]);
 

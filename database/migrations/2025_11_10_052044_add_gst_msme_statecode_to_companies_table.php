@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cities', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('state_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('companies', function (Blueprint $table) {
+            $table->string('gst_no')->nullable();
+            $table->string('msme_no')->nullable();
+            $table->string('state_code')->nullable();
         });
     }
 
@@ -24,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cities');
+        Schema::table('companies', function (Blueprint $table) {
+            $table->dropColumn(['gst_no', 'msme_no', 'state_code']);
+        });
     }
 };

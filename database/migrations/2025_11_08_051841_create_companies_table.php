@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('phone_number');
             $table->text('address');
             $table->text('alternate_address')->nullable();
-            $table->string('country_id');
             $table->string('state_id');
             $table->string('city_id');
             $table->string('pincode');

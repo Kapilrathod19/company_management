@@ -43,33 +43,19 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Address</label>
+                            <label class="form-label">Office Address</label>
                             <input type="text" name="address" id="address"
                                 value="{{ old('address', $company->address) }}" class="form-control">
                             <span class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Alternate Address</label>
+                            <label class="form-label">Factory Address</label>
                             <input type="text" name="alternate_address" id="alternate_address"
                                 value="{{ old('alternate_address', $company->alternate_address) }}" class="form-control">
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Country</label>
-                                <select name="country" id="country" class="form-control">
-                                    <option value="">Select Country</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country->id }}"
-                                            {{ $company->country_id == $country->id ? 'selected' : '' }}>
-                                            {{ $country->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <span class="text-danger"></span>
-
-                            </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">State</label>
                                 <select name="state" id="state" class="form-control">
@@ -94,17 +80,37 @@
                                     @endforeach
                                 </select>
                                 <span class="text-danger"></span>
+                            </div>
 
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Pincode</label>
+                                <input type="text" name="pincode" id="pincode"
+                                    value="{{ old('pincode', $company->pincode) }}" class="form-control">
+                                <span class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="gst_no" class="form-label">GST Number</label>
+                                <input type="text" name="gst_no" class="form-control" id="gst_no"
+                                    value="{{ old('gst_no', $company->gst_no) }}">
+                                <span class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="msme_no" class="form-label">MSME Number</label>
+                                <input type="text" name="msme_no" class="form-control" id="msme_no"
+                                    value="{{ old('msme_no', $company->msme_no) }}">
+                                <span class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="state_code" class="form-label">State Code</label>
+                                <input type="text" name="state_code" class="form-control" id="state_code"
+                                    value="{{ old('state_code', $company->state_code) }}">
+                                <span class="text-danger"></span>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Pincode</label>
-                            <input type="text" name="pincode" id="pincode"
-                                value="{{ old('pincode', $company->pincode) }}" class="form-control">
-                            <span class="text-danger"></span>
-
-                        </div>
 
                         <div class="mb-3">
                             <label class="form-label">Image</label>
@@ -120,7 +126,8 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#passwordModal">
+                        <button type="button" class="btn btn-secondary" data-toggle="modal"
+                            data-target="#passwordModal">
                             Change Password
                         </button>
                     </form>
@@ -170,24 +177,20 @@
     <script>
         $(document).ready(function() {
 
-            // All required fields
             var fieldsToValidate = [
                 '#name',
                 '#email',
                 '#phone_number',
                 '#address',
-                '#country',
                 '#state',
                 '#city',
                 '#pincode'
             ];
 
-            // Allow only numeric input for phone and pincode
             $('#phone_number, #pincode').on('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, ''); // remove non-numeric chars
+                this.value = this.value.replace(/[^0-9]/g, '');
             });
 
-            // Validate on input/change
             $('#myForm').on('input change', fieldsToValidate.join(','), function() {
                 validateField($(this));
             });
@@ -227,12 +230,11 @@
                 var isValid = value !== "";
                 var name = field.attr('name');
 
-                // Extra checks
                 if (name === 'email') {
                     if (value !== "") {
                         isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
                     } else {
-                        isValid = false; // empty email is still invalid
+                        isValid = false;
                     }
                 }
 
@@ -244,7 +246,6 @@
                     isValid = /^[0-9]{4,10}$/.test(value);
                 }
 
-                // Styling and messages
                 field.toggleClass('is-invalid', !isValid).toggleClass('is-valid', isValid);
 
                 let message = "";
@@ -264,55 +265,41 @@
 
         });
 
-        // Dynamic State & City Dropdowns
-        $('#country').on('change', function() {
-            var countryId = $(this).val();
-            $('#state').html('<option value="">Loading...</option>');
-            $('#city').html('<option value="">Select City</option>');
-            if (countryId) {
-                $.ajax({
-                    url: '/get-states/' + countryId,
-                    type: 'GET',
-                    success: function(states) {
-                        var options = '<option value="">Select State</option>';
-                        $.each(states, function(index, state) {
-                            options += '<option value="' + state.id + '">' + state.name +
-                                '</option>';
-                        });
-                        $('#state').html(options);
-                    },
-                    error: function() {
-                        $('#state').html('<option value="">Error loading states</option>');
-                    }
-                });
-            } else {
-                $('#state').html('<option value="">Select State</option>');
+        function loadCities(stateId, selectedCity = null) {
+            if (!stateId) {
                 $('#city').html('<option value="">Select City</option>');
+                return;
             }
-        });
-
-        $('#state').on('change', function() {
-            var stateId = $(this).val();
             $('#city').html('<option value="">Loading...</option>');
-            if (stateId) {
-                $.ajax({
-                    url: '/get-cities/' + stateId,
-                    type: 'GET',
-                    success: function(cities) {
-                        var options = '<option value="">Select City</option>';
-                        $.each(cities, function(index, city) {
-                            options += '<option value="' + city.id + '">' + city.name +
-                                '</option>';
-                        });
-                        $('#city').html(options);
-                    },
-                    error: function() {
-                        $('#city').html('<option value="">Error loading cities</option>');
-                    }
-                });
-            } else {
-                $('#city').html('<option value="">Select City</option>');
-            }
+            $.ajax({
+                url: '/get-cities/' + stateId,
+                type: 'GET',
+                success: function(cities) {
+                    var options = '<option value="">Select City</option>';
+                    $.each(cities, function(index, city) {
+                        options += '<option value="' + city.id + '" ' +
+                            (city.id == selectedCity ? 'selected' : '') + '>' +
+                            city.name + '</option>';
+                    });
+                    $('#city').html(options);
+                },
+                error: function() {
+                    $('#city').html('<option value="">Error loading cities</option>');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            var selectedState = "{{ old('state', $company->state_id) }}";
+            var selectedCity = "{{ old('city', $company->city_id) }}";
+
+            // Initial load
+            loadCities(selectedState, selectedCity);
+
+            // Change event
+            $('#state').on('change', function() {
+                loadCities($(this).val());
+            });
         });
     </script>
 @endsection

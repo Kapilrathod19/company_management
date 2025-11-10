@@ -63,28 +63,14 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="address" class="form-label">Address</label>
+                                        <label for="address" class="form-label">Office Address</label>
                                         <textarea name="address" id="address" rows="2" class="form-control">{{ old('address') }}</textarea>
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="alternate_address" class="form-label">Alternate Address</label>
+                                        <label for="alternate_address" class="form-label">Factory Address</label>
                                         <textarea name="alternate_address" id="alternate_address" rows="2" class="form-control">{{ old('alternate_address') }}</textarea>
-                                        <span class="text-danger"></span>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="country" class="form-label">Country</label>
-                                        <select name="country" id="country" class="form-control">
-                                            <option value="">Select Country</option>
-                                            @foreach ($countries as $country)
-                                                <option value="{{ $country->id }}"
-                                                    {{ old('country') == $country->id ? 'selected' : '' }}>
-                                                    {{ $country->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -92,6 +78,12 @@
                                         <label for="state" class="form-label">State</label>
                                         <select name="state" id="state" class="form-control">
                                             <option value="">Select State</option>
+                                            @foreach ($states as $state)
+                                                <option value="{{ $state->id }}"
+                                                    {{ old('state') == $state->id ? 'selected' : '' }}>
+                                                    {{ $state->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                         <span class="text-danger"></span>
                                     </div>
@@ -104,11 +96,31 @@
                                         <span class="text-danger"></span>
                                     </div>
 
-
                                     <div class="col-md-6 mb-3">
                                         <label for="pincode" class="form-label">Pincode</label>
                                         <input type="text" name="pincode" id="pincode" class="form-control"
                                             value="{{ old('pincode') }}">
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="gst_no" class="form-label">GST Number</label>
+                                        <input type="text" name="gst_no" class="form-control" id="gst_no"
+                                            value="{{ old('gst_no') }}">
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="msme_no" class="form-label">MSME Number</label>
+                                        <input type="text" name="msme_no" class="form-control" id="msme_no"
+                                            value="{{ old('msme_no') }}">
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="state_code" class="form-label">State Code</label>
+                                        <input type="text" name="state_code" class="form-control" id="state_code"
+                                            value="{{ old('state_code') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -146,10 +158,12 @@
                 '#password',
                 '#phone_number',
                 '#address',
-                '#country',
                 '#state',
                 '#city',
-                '#pincode'
+                '#pincode',
+                '#gst_no',
+                '#msme_no',
+                '#state_code'
             ];
 
             // Allow only numeric input for phone and pincode
@@ -234,40 +248,15 @@
 
         });
 
-        // Dynamic State & City Dropdowns
-        $('#country').on('change', function() {
-            var countryId = $(this).val();
-            $('#state').html('<option value="">Loading...</option>');
-            $('#city').html('<option value="">Select City</option>');
-            if (countryId) {
-                $.ajax({
-                    url: '/get-states/' + countryId,
-                    type: 'GET',
-                    success: function(states) {
-                        var options = '<option value="">Select State</option>';
-                        $.each(states, function(index, state) {
-                            options += '<option value="' + state.id + '">' + state.name +
-                                '</option>';
-                        });
-                        $('#state').html(options);
-                    },
-                    error: function() {
-                        $('#state').html('<option value="">Error loading states</option>');
-                    }
-                });
-            } else {
-                $('#state').html('<option value="">Select State</option>');
-                $('#city').html('<option value="">Select City</option>');
-            }
-        });
-
         $('#state').on('change', function() {
             var stateId = $(this).val();
             $('#city').html('<option value="">Loading...</option>');
+
             if (stateId) {
                 $.ajax({
                     url: '/get-cities/' + stateId,
                     type: 'GET',
+                    dataType: 'json',
                     success: function(cities) {
                         var options = '<option value="">Select City</option>';
                         $.each(cities, function(index, city) {
@@ -276,7 +265,8 @@
                         });
                         $('#city').html(options);
                     },
-                    error: function() {
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
                         $('#city').html('<option value="">Error loading cities</option>');
                     }
                 });
