@@ -28,6 +28,12 @@
                         <span class="ml-2">Dashboard</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/users')) active @endif sidebar-layout">
+                    <a href="{{ route('company.users') }}" class="svg-icon">
+                        <i class="bi bi-people"></i>
+                        <span class="ml-2">Users</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="pt-5 pb-5"></div>

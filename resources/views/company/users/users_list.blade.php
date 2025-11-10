@@ -1,5 +1,5 @@
-@extends('admin.layout.main_layout')
-@section('title', 'Admin | Company List')
+@extends('company.layout.main_layout')
+@section('title', 'Company | Users List')
 @section('content')
     <div class="content-page">
         <div class="container-fluid">
@@ -8,11 +8,11 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
                             <div class="header-title">
-                                <h5 class="card-title">Company List</h5>
+                                <h5 class="card-title">Users List</h5>
                             </div>
                             <div class="header-action">
-                                <a class="btn btn-primary" href="{{ route('admin.create_company') }}" role="button"><i
-                                        class="bi bi-plus"></i> Add Company</a>
+                                <a class="btn btn-primary" href="{{ route('company.create_user') }}" role="button"><i
+                                        class="bi bi-plus"></i> Add User</a>
                             </div>
                         </div>
                     </div>
@@ -23,46 +23,26 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
+                                            <th>Company Name</th>
                                             <th>Name</th>
                                             <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Office Address</th>
-                                            <th>Factory Address</th>
-                                            <th>State</th>
-                                            <th>City</th>
-                                            <th>Pincode</th>
-                                            <th>GST Number</th>
-                                            <th>MSME Number</th>
-                                            <th>State Code</th>
-                                            <th>Image</th>
+                                            <th>Mobile</th>
+                                            <th>Department</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($companies as $item)
+                                        @foreach ($comanyUsers as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $item->user->name ?? '' }}</td>
-                                                <td>{{ $item->user->email ?? '' }}</td>
-                                                <td>{{ $item->phone_number ?? '' }}</td>
-                                                <td>{{ $item->address ?? '' }}</td>
-                                                <td>{{ $item->alternate_address ?? '' }}</td>
-                                                <td>{{ $item->state->name ?? '' }}</td>
-                                                <td>{{ $item->city->name ?? '' }}</td>
-                                                <td>{{ $item->pincode ?? '' }}</td>
-                                                <td>{{ $item->gst_no ?? '' }}</td>
-                                                <td>{{ $item->msme_no ?? '' }}</td>
-                                                <td>{{ $item->state_code ?? '' }}</td>
-                                                <td>
-                                                    @if ($item->image)
-                                                        <img src="{{ asset('company_images/' . $item->image) }}"
-                                                            alt="Company Image"
-                                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                                                    @endif
-                                                </td>
+                                                <td>{{ $item->company->name ?? '' }}</td>
+                                                <td>{{ $item->name ?? '' }}</td>
+                                                <td>{{ $item->mobile ?? '' }}</td>
+                                                <td>{{ $item->email ?? '' }}</td>
+                                                <td>{{ $item->department ?? '' }}</td>
                                                 <td>
                                                     <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('admin.edit_company', $item->id) }}" role="button">
+                                                        href="{{ route('company.edit_user', $item->id) }}" role="button">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <a class="btn btn-danger btn-sm delete-confirm mb-2"
@@ -101,7 +81,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.location.href =
-                                "{{ URL::to('admin/company/destroy') }}/" + id;
+                                "{{ URL::to('company/users/destroy') }}/" + id;
                         }
                     });
                 });

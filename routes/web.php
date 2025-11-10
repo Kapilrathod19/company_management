@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
+use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Artisan;
@@ -57,6 +58,15 @@ Route::middleware(['auth', 'checkRole:company'])->group(function () {
             Route::get('/', [CompanyDashboardController::class, 'profile'])->name('company.profile');
             Route::post('store', [CompanyDashboardController::class, 'profile_store'])->name('company_profile.store');
             Route::post('change_password', [CompanyDashboardController::class, 'change_password'])->name('company_profile.change_password');
+        });
+        
+        Route::prefix('users')->group(function () {
+            Route::get('/', [CompanyUsersController::class, 'users'])->name('company.users');
+            Route::get('create_user', [CompanyUsersController::class, 'create_user'])->name('company.create_user');
+            Route::post('/store', [CompanyUsersController::class, 'store_user'])->name('company.store_user');
+            Route::get('/edit/{id}', [CompanyUsersController::class, 'edit_user'])->name('company.edit_user');
+            Route::put('/update/{id}', [CompanyUsersController::class, 'update_user'])->name('company.update_user');
+            Route::get('/destroy/{id}', [CompanyUsersController::class, 'destroy_user'])->name('company.destroy_user');
         });
 
     });
