@@ -12,7 +12,7 @@
     <title>
         @if (!empty($setting->site_name))
             {{ $setting->site_name }}
-        @endif Admin Login
+        @endif Login
     </title>
 
     @if (!empty($setting->site_logo))
