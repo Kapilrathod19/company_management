@@ -16,9 +16,15 @@ class CheckRole
      */
     public function handle($request, Closure $next, $role)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            return redirect()->route('login')->withErrors(['email' => 'Unauthorized access.']);
+        if (!Auth::check()) {
+            return redirect()->route('login')->withErrors(['email' => 'You must log in first.']);
         }
+
+        if (Auth::user()->role !== $role) {
+            Auth::logout();
+            return redirect()->route('login')->withErrors(['email' => 'Access denied.']);
+        }
+
         return $next($request);
     }
 }

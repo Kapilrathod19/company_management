@@ -37,6 +37,13 @@ class AuthController extends Controller
                 return back()->withErrors(['email' => 'Access denied.'])->withInput();
             }
         }
+        
+        if (Auth::guard('company_user')->attempt($credentials)) {
+            $request->session()->regenerate();
+            $companyUser = Auth::guard('company_user')->user();
+
+            return redirect()->route('user.dashboard')->with('success', 'Welcome, ' . $companyUser->name . '!');
+        }
 
         return back()->withErrors(['email' => 'Invalid email or password.'])->withInput();
     }

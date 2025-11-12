@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -59,7 +60,7 @@ Route::middleware(['auth', 'checkRole:company'])->group(function () {
             Route::post('store', [CompanyDashboardController::class, 'profile_store'])->name('company_profile.store');
             Route::post('change_password', [CompanyDashboardController::class, 'change_password'])->name('company_profile.change_password');
         });
-        
+
         Route::prefix('users')->group(function () {
             Route::get('/', [CompanyUsersController::class, 'users'])->name('company.users');
             Route::get('create_user', [CompanyUsersController::class, 'create_user'])->name('company.create_user');
@@ -68,6 +69,16 @@ Route::middleware(['auth', 'checkRole:company'])->group(function () {
             Route::put('/update/{id}', [CompanyUsersController::class, 'update_user'])->name('company.update_user');
             Route::get('/destroy/{id}', [CompanyUsersController::class, 'destroy_user'])->name('company.destroy_user');
         });
+    });
+});
 
+Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
+
+    Route::get('dashboard', [UserController::class, 'index'])->name('user.dashboard');
+
+    Route::prefix('user_profile')->group(function () {
+        Route::get('/', [UserController::class, 'profile'])->name('user.profile');
+        Route::post('store', [UserController::class, 'profile_store'])->name('user_profile.store');
+        Route::post('change_password', [UserController::class, 'change_password'])->name('user_profile.change_password');
     });
 });
