@@ -10,8 +10,12 @@
                             <div class="bg-white rounded shadow-sm p-4 position-relative overflow-hidden">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="header-title">
-                                        <h2 class="card-title">Welcome Back</h2>
-                                        <h5 class="text-muted">Admin</h5>
+                                        <h2 class="card-title">
+                                            Welcome Back,
+                                            <span class="text-primary">
+                                                {{ Auth::user()->name ?? 'Admin' }}
+                                            </span>
+                                        </h2>
                                     </div>
                                 </div>
                             </div>
