@@ -64,7 +64,7 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="unit" class="form-label">unit</label>
+                                        <label for="unit" class="form-label">Unit</label>
                                         <input type="text" name="unit" class="form-control" id="unit"
                                             value="{{ old('unit') }}">
                                         <span class="text-danger"></span>
