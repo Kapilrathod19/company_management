@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PartyController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
@@ -80,5 +81,14 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
         Route::post('store', [UserController::class, 'profile_store'])->name('user_profile.store');
         Route::post('change_password', [UserController::class, 'change_password'])->name('user_profile.change_password');
+    });
+
+    Route::prefix('party')->group(function () {
+        Route::get('/', [PartyController::class, 'index'])->name('party.index');
+        Route::get('create', [PartyController::class, 'create'])->name('party.create');
+        Route::post('/store', [PartyController::class, 'store'])->name('party.store');
+        Route::get('/edit/{id}', [PartyController::class, 'edit'])->name('party.edit');
+        Route::put('/update/{id}', [PartyController::class, 'update'])->name('party.update');
+        Route::get('/destroy/{id}', [PartyController::class, 'destroy'])->name('party.destroy');
     });
 });

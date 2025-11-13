@@ -28,6 +28,12 @@
                         <span class="ml-2">Dashboard</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/party')) active @endif sidebar-layout">
+                    <a href="{{ route('party.index') }}" class="svg-icon">
+                        <i class="bi bi-people"></i>
+                        <span class="ml-2">Party Master</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="pt-5 pb-5"></div>
