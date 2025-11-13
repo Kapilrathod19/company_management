@@ -41,9 +41,12 @@
                                         <label for="category" class="form-label">Category</label>
                                         <select name="category" id="category" class="form-control">
                                             <option value="">Select Category</option>
-                                            <option value="Customer" {{ $party->category == 'Customer' ? 'selected' : '' }}>Customer</option>
-                                            <option value="Supplier" {{ $party->category == 'Supplier' ? 'selected' : '' }}>Supplier</option>
-                                            <option value="Jobwork" {{ $party->category == 'Jobwork' ? 'selected' : '' }}>Jobwork</option>
+                                            <option value="Customer" {{ $party->category == 'Customer' ? 'selected' : '' }}>
+                                                Customer</option>
+                                            <option value="Supplier" {{ $party->category == 'Supplier' ? 'selected' : '' }}>
+                                                Supplier</option>
+                                            <option value="Jobwork" {{ $party->category == 'Jobwork' ? 'selected' : '' }}>
+                                                Jobwork</option>
                                         </select>
                                         <span class="text-danger"></span>
                                     </div>
@@ -76,7 +79,7 @@
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-12 mb-3">
                                         <label for="address" class="form-label">Address</label>
                                         <textarea name="address" id="address" rows="2" class="form-control">{{ old('address', $party->address) }}</textarea>
                                         <span class="text-danger"></span>
@@ -100,14 +103,13 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-
-            var fieldsToValidate = [
+            const fieldsToValidate = [
                 '#category',
                 '#name',
                 '#email',
                 '#mobile_number',
                 '#gst_number',
-                '#address',
+                '#address'
             ];
 
             $('#mobile_number').on('input', function() {
@@ -120,46 +122,39 @@
 
             $('#myform').submit(function(e) {
                 e.preventDefault();
+                let valid = true;
 
-                var valid = fieldsToValidate.every(function(selector) {
-                    return validateField($(selector));
+                fieldsToValidate.forEach(selector => {
+                    if (!validateField($(selector))) valid = false;
                 });
 
-                if (valid) {
-                    this.submit();
-                }
+                if (valid) this.submit();
             });
 
             function validateField(field) {
-                var value = field.val().trim();
-                var isValid = value !== "";
-                var name = field.attr('name');
+                const name = field.attr('name');
+                const value = field.val().trim();
+                let isValid = value !== "";
+                let message = "";
 
-                if (name === 'email') {
-                    if (value !== "") {
-                        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-                    } else {
-                        isValid = false;
-                    }
-                }
-
-                if (name === 'mobile_number') {
-                    isValid = /^[0-9]{10,15}$/.test(value);
+                if (value === "") {
+                    message = `${formatLabel(name)} is required.`;
+                    isValid = false;
+                } else if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    message = "Please enter a valid email address.";
+                    isValid = false;
+                } else if (name === 'mobile_number' && !/^[0-9]{10,15}$/.test(value)) {
+                    message = "Please enter a valid mobile number (10–15 digits).";
+                    isValid = false;
                 }
 
                 field.toggleClass('is-invalid', !isValid).toggleClass('is-valid', isValid);
-
-                let message = "";
-                if (value === "") {
-                    message = `${name.replace('_', ' ')} is required.`;
-                } else if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    message = "Please enter a valid email address.";
-                } else if (name === 'mobile_number' && !/^[0-9]{10,15}$/.test(value)) {
-                    message = "Please enter a valid mobile number.";
-                }
-
                 field.siblings('.text-danger').text(message);
                 return isValid;
+            }
+
+            function formatLabel(name) {
+                return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             }
         });
     </script>

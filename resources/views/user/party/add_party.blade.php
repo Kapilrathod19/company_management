@@ -1,5 +1,5 @@
 @extends('user.layout.main_layout')
-@section('title', ' User | Add Party')
+@section('title', 'User | Add Party')
 
 @section('content')
     <div class="content-page">
@@ -15,6 +15,7 @@
                     </div>
 
                     <div class="card">
+                        {{-- Validation & Alerts --}}
                         @if ($errors->any())
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
@@ -24,6 +25,7 @@
                                 </ul>
                             </div>
                         @endif
+
                         @if (session('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{ session('success') }}
@@ -38,19 +40,19 @@
                             </div>
                         @endif
 
+                        {{-- Form --}}
                         <div class="card-body">
                             <form id="myform" action="{{ route('party.store') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
-
                                     <div class="col-md-6 mb-3">
                                         <label for="category" class="form-label">Category</label>
                                         <select name="category" id="category" class="form-control">
                                             <option value="">Select Category</option>
                                             <option value="Customer">Customer</option>
                                             <option value="Supplier">Supplier</option>
-                                            <option value="Jobwork ">Jobwork </option>
+                                            <option value="Jobwork">Jobwork</option>
                                         </select>
                                         <span class="text-danger"></span>
                                     </div>
@@ -78,17 +80,16 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="gst_number" class="form-label">GST Number</label>
-                                        <input type="text" name="gst_number" class="form-control" id="gst_number"
+                                        <input type="text" name="gst_number" id="gst_number" class="form-control"
                                             value="{{ old('gst_number') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-12 mb-3">
                                         <label for="address" class="form-label">Address</label>
                                         <textarea name="address" id="address" rows="2" class="form-control">{{ old('address') }}</textarea>
                                         <span class="text-danger"></span>
                                     </div>
-
                                 </div>
 
                                 <div class="mt-3">
@@ -97,6 +98,7 @@
                             </form>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -107,93 +109,79 @@
     <script>
         $(document).ready(function() {
 
-            // All required fields
-            var fieldsToValidate = [
-                '#category',
-                '#name',
-                '#email',
-                '#mobile_number',
-                '#gst_number',
-                '#address',
-            ];
-
             $('#mobile_number').on('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
 
-            // Validate on input/change
-            $('#myform').on('input change', fieldsToValidate.join(','), function() {
-                validateField($(this));
-            });
-
-            // Preview Image
-            $('#image').on('change', function() {
-                var file = this.files[0];
-                var imageContainer = $('#imageContainer');
-                if (file && file.type.startsWith('image/')) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        imageContainer.html('<img src="' + e.target.result +
-                            '" class="img-thumbnail" style="max-width:250px;">');
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    imageContainer.html('');
+            const fields = [{
+                    id: '#category',
+                    name: 'Category'
+                },
+                {
+                    id: '#name',
+                    name: 'Name'
+                },
+                {
+                    id: '#email',
+                    name: 'Email'
+                },
+                {
+                    id: '#mobile_number',
+                    name: 'Mobile Number'
+                },
+                {
+                    id: '#gst_number',
+                    name: 'GST Number'
+                },
+                {
+                    id: '#address',
+                    name: 'Address'
                 }
-            });
+            ];
 
-            // Form Submit Handler
-            $('#myform').submit(function(e) {
-                e.preventDefault();
+            function validateField(field, name) {
+                const value = $(field).val().trim();
+                let isValid = true;
+                let message = '';
 
-                var valid = fieldsToValidate.every(function(selector) {
-                    return validateField($(selector));
-                });
-
-                if (valid) {
-                    this.submit();
-                }
-            });
-
-            // Validation Function
-            function validateField(field) {
-                var value = field.val().trim();
-                var isValid = value !== "";
-                var name = field.attr('name');
-
-                // Extra checks
-                if (name === 'email') {
-                    if (value !== "") {
-                        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-                    } else {
-                        isValid = false; // empty email is still invalid
-                    }
+                if (!value) {
+                    isValid = false;
+                    message = `${name} is required.`;
                 }
 
-                if (name === 'mobile_number') {
-                    isValid = /^[0-9]{10,15}$/.test(value);
+                if (name === 'Email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    isValid = false;
+                    message = 'Please enter a valid email address.';
                 }
 
-                if (name === 'pincode') {
-                    isValid = /^[0-9]{4,10}$/.test(value);
+                if (name === 'Mobile Number' && value && !/^[0-9]{10,15}$/.test(value)) {
+                    isValid = false;
+                    message = 'Please enter a valid mobile number.';
                 }
 
-                // Styling and messages
-                field.toggleClass('is-invalid', !isValid).toggleClass('is-valid', isValid);
+                $(field).toggleClass('is-invalid', !isValid);
+                $(field).toggleClass('is-valid', isValid);
+                $(field).siblings('.text-danger').text(message);
 
-                let message = "";
-                if (value === "") {
-                    message = `${name.replace('_', ' ')} is required.`;
-                } else if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    message = "Please enter a valid email address.";
-                } else if (name === 'mobile_number' && !/^[0-9]{10,15}$/.test(value)) {
-                    message = "Please enter a valid mobile number.";
-                }
-
-                field.siblings('.text-danger').text(message);
                 return isValid;
             }
 
+            fields.forEach(f => {
+                $(f.id).on('input change', function() {
+                    validateField(this, f.name);
+                });
+            });
+
+            $('#myform').on('submit', function(e) {
+                let valid = true;
+                fields.forEach(f => {
+                    if (!validateField(f.id, f.name)) valid = false;
+                });
+
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 @endsection
