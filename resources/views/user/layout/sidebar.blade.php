@@ -34,6 +34,12 @@
                         <span class="ml-2">Party Master</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/item')) active @endif sidebar-layout">
+                    <a href="{{ route('item.index') }}" class="svg-icon">
+                        <i class="bi bi-box-seam"></i>
+                        <span class="ml-2">Item Master</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="pt-5 pb-5"></div>

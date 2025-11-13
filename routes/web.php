@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
@@ -90,5 +91,14 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/edit/{id}', [PartyController::class, 'edit'])->name('party.edit');
         Route::put('/update/{id}', [PartyController::class, 'update'])->name('party.update');
         Route::get('/destroy/{id}', [PartyController::class, 'destroy'])->name('party.destroy');
+    });
+    
+    Route::prefix('item')->group(function () {
+        Route::get('/', [ItemController::class, 'index'])->name('item.index');
+        Route::get('create', [ItemController::class, 'create'])->name('item.create');
+        Route::post('/store', [ItemController::class, 'store'])->name('item.store');
+        Route::get('/edit/{id}', [ItemController::class, 'edit'])->name('item.edit');
+        Route::put('/update/{id}', [ItemController::class, 'update'])->name('item.update');
+        Route::get('/destroy/{id}', [ItemController::class, 'destroy'])->name('item.destroy');
     });
 });
