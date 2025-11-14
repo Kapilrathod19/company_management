@@ -42,7 +42,7 @@
 
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="mb-3">
                             <label for="department" class="form-label">Department</label>
                             <input type="text" name="department" id="department" class="form-control"
                                 value="{{ old('department', $user->department) }}">
