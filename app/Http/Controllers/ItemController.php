@@ -27,8 +27,6 @@ class ItemController extends Controller
             'part_number' => 'required|string|max:255',
             'description' => 'required|string|max:500',
             'unit' => 'required|string|max:50',
-            'quantity' => 'required|integer',
-            'weight' => 'required|string',
         ]);
 
         Item::create([
@@ -59,8 +57,6 @@ class ItemController extends Controller
             'part_number' => 'required|string|max:255',
             'description' => 'required|string|max:500',
             'unit' => 'required|string|max:50',
-            'quantity' => 'required|integer',
-            'weight' => 'required|string',
         ]);
 
         $item = Item::where('user_id', auth()->id())->where('id', $id)->firstOrFail();

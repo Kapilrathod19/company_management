@@ -72,6 +72,12 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea name="description" id="description" class="form-control">{{ old('description', $item->description) }}</textarea>
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="unit" class="form-label">Unit</label>
                                         <input type="text" name="unit" id="unit" class="form-control"
                                             value="{{ old('unit', $item->unit) }}">
@@ -91,12 +97,7 @@
                                             value="{{ old('weight', $item->weight) }}">
                                         <span class="text-danger"></span>
                                     </div>
-
-                                    <div class="col-md-12 mb-3">
-                                        <label for="description" class="form-label">Description</label>
-                                        <textarea name="description" id="description" rows="2" class="form-control">{{ old('description', $item->description) }}</textarea>
-                                        <span class="text-danger"></span>
-                                    </div>
+                                    
                                 </div>
 
                                 <div class="mt-3">
@@ -127,14 +128,6 @@
                 {
                     id: '#unit',
                     name: 'Unit'
-                },
-                {
-                    id: '#quantity',
-                    name: 'Quantity'
-                },
-                {
-                    id: '#weight',
-                    name: 'Weight'
                 },
                 {
                     id: '#description',
