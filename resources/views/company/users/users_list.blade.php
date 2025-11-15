@@ -37,8 +37,8 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $item->company->name ?? '' }}</td>
                                                 <td>{{ $item->name ?? '' }}</td>
-                                                <td>{{ $item->mobile ?? '' }}</td>
                                                 <td>{{ $item->email ?? '' }}</td>
+                                                <td>{{ $item->mobile ?? '' }}</td>
                                                 <td>{{ $item->department ?? '' }}</td>
                                                 <td>
                                                     <a class="btn btn-primary btn-sm mb-2"
