@@ -43,6 +43,10 @@
                                                 <td>{{ $item->quantity ?? '' }}</td>
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>
+                                                    <button class="btn btn-success btn-sm mb-2 show-process-btn"
+                                                        data-id="{{ $item->id }}">
+                                                        <i class="bi bi-diagram-3"></i>
+                                                    </button>
                                                     <a class="btn btn-primary btn-sm mb-2"
                                                         href="{{ route('item.edit', $item->id) }}" role="button">
                                                         <i class="bi bi-pencil-square"></i>
@@ -64,6 +68,37 @@
             </div>
         </div>
     </div>
+
+    <!-- PROCESS MODAL -->
+
+    <div class="modal fade" id="processModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Item Processes</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Process Name</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processData">
+                            <!-- Loaded by AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 @section('scripts')
     <script>
@@ -89,6 +124,49 @@
                     });
                 });
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.show-process-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+
+                    let itemId = this.getAttribute('data-id');
+
+                    document.getElementById('processData').innerHTML =
+                        '<tr><td colspan="3">Loading...</td></tr>';
+
+                    var fetchUrl = "{{ route('process.get', ['id' => ':id']) }}";
+                    fetchUrl = fetchUrl.replace(':id', itemId);
+
+                    fetch(fetchUrl)
+                        .then(res => res.json())
+                        .then(data => {
+                            let rows = "";
+
+                            if (data.length === 0) {
+                                rows =
+                                    '<tr><td colspan="3" class="text-center">No Processes Found</td></tr>';
+                            } else {
+                                data.forEach((p, index) => {
+                                    rows += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${p.process_name}</td>
+                                    <td>${p.details ?? '—'}</td>
+                                </tr>
+                            `;
+                                });
+                            }
+
+                            document.getElementById('processData').innerHTML = rows;
+                        });
+
+                    var modal = new bootstrap.Modal(document.getElementById('processModal'));
+                    modal.show();
+                });
+            });
+
         });
     </script>
 @endsection

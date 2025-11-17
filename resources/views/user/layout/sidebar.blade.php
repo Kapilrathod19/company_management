@@ -40,6 +40,14 @@
                         <span class="ml-2">Item Master</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/process')) active @endif sidebar-layout">
+                    <a href="{{ route('process.items') }}" class="svg-icon">
+                        <i class="bi bi-diagram-3"></i>
+                        <span class="ml-2">Item Processes</span>
+                    </a>
+                </li>
+
+
             </ul>
         </nav>
         <div class="pt-5 pb-5"></div>

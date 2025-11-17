@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id','category','part_number','description','unit','quantity','weight'];
+    protected $fillable = ['user_id', 'category', 'part_number', 'description', 'unit', 'quantity', 'weight'];
+
+    public function processes()
+    {
+        return $this->hasMany(Process::class);
+    }
 }
