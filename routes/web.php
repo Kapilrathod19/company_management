@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminUsersController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
@@ -49,6 +50,15 @@ Route::middleware(['auth', 'checkRole:admin'])->group(function () {
             Route::get('/edit/{id}', [CompanyController::class, 'edit_company'])->name('admin.edit_company');
             Route::put('/update/{id}', [CompanyController::class, 'update_company'])->name('admin.update_company');
             Route::get('/destroy/{id}', [CompanyController::class, 'destroy_company'])->name('admin.destroy_company');
+        });
+
+        Route::prefix('admin_users')->group(function () {
+            Route::get('/', [AdminUsersController::class, 'users'])->name('admin.users');
+            Route::get('create_user', [AdminUsersController::class, 'create_user'])->name('admin.create_user');
+            Route::post('/store', [AdminUsersController::class, 'store_user'])->name('admin.store_user');
+            Route::get('/edit/{id}', [AdminUsersController::class, 'edit_user'])->name('admin.edit_user');
+            Route::put('/update/{id}', [AdminUsersController::class, 'update_user'])->name('admin.update_user');
+            Route::get('/destroy/{id}', [AdminUsersController::class, 'destroy_user'])->name('admin.destroy_user');
         });
     });
 });

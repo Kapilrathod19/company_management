@@ -37,7 +37,7 @@ class CompanyController extends Controller
             'pincode' => 'required|string|max:10',
             'gst_no' => 'nullable|string|max:50',
             'msme_no' => 'nullable|string|max:50',
-            'state_code' => 'nullable|string|max:10',
+            'state_code' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -103,7 +103,7 @@ class CompanyController extends Controller
             'pincode' => 'required|string|max:10',
             'gst_no' => 'nullable|string|max:50',
             'msme_no' => 'nullable|string|max:50',
-            'state_code' => 'nullable|string|max:10',
+            'state_code' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 

@@ -1,5 +1,5 @@
-@extends('company.layout.main_layout')
-@section('title', 'Company | Users List')
+@extends('admin.layout.main_layout')
+@section('title', 'Admin | Users List')
 @section('content')
     <div class="content-page">
         <div class="container-fluid">
@@ -11,7 +11,7 @@
                                 <h5 class="card-title">Users List</h5>
                             </div>
                             <div class="header-action">
-                                <a class="btn btn-primary" href="{{ route('company.create_user') }}" role="button"><i
+                                <a class="btn btn-primary" href="{{ route('admin.create_user') }}" role="button"><i
                                         class="bi bi-plus"></i> Add User</a>
                             </div>
                         </div>
@@ -23,6 +23,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
+                                            <th>Company Name</th>
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Mobile</th>
@@ -34,13 +35,14 @@
                                         @foreach ($comanyUsers as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $item->company->name ?? '' }}</td>
                                                 <td>{{ $item->name ?? '' }}</td>
                                                 <td>{{ $item->email ?? '' }}</td>
                                                 <td>{{ $item->mobile ?? '' }}</td>
                                                 <td>{{ $item->department ?? '' }}</td>
                                                 <td>
                                                     <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('company.edit_user', $item->id) }}" role="button">
+                                                        href="{{ route('admin.edit_user', $item->id) }}" role="button">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <a class="btn btn-danger btn-sm delete-confirm mb-2"
@@ -79,7 +81,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.location.href =
-                                "{{ URL::to('company/users/destroy') }}/" + id;
+                                "{{ URL::to('admin/admin_users/destroy') }}/" + id;
                         }
                     });
                 });

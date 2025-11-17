@@ -40,6 +40,12 @@
                         <span>Company Master</span>
                     </a>
                 </li>
+                <li class="sidebar-layout @if (Request::is('admin/admin_users*')) active @endif">
+                    <a href="{{ route('admin.users') }}" class="d-flex align-items-center">
+                        <i class="bi bi-people me-2" style="font-size: 1.2rem;"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>
