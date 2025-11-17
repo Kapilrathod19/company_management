@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Process;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -73,11 +74,10 @@ class ItemController extends Controller
         return redirect()->route('item.index')->with('success', 'Item updated successfully.');
     }
 
-
-
     public function destroy($id)
     {
         $Item = item::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
+        Process::where('item_id', $Item->id)->delete();
         $Item->delete();
 
         return redirect()->route('item.index')->with('success', 'Item deleted successfully.');

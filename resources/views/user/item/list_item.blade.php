@@ -44,7 +44,7 @@
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>
                                                     <button class="btn btn-success btn-sm mb-2 show-process-btn"
-                                                        data-id="{{ $item->id }}">
+                                                        data-id="{{ $item->id }}" title="View Processes">
                                                         <i class="bi bi-diagram-3"></i>
                                                     </button>
                                                     <a class="btn btn-primary btn-sm mb-2"
