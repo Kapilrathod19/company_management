@@ -24,7 +24,7 @@ Route::get('/clear', function () {
     return 'Route cache cleared successfully!';
 });
 
-Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('check-login', [AuthController::class, 'checkLogin'])->name('check.login');
 Route::get('logout', [AuthController::class, 'Logout'])->name('logout');
 
