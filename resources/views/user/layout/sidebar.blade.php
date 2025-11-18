@@ -46,7 +46,12 @@
                         <span class="ml-2">Item Processes</span>
                     </a>
                 </li>
-
+                <li class="@if (str_contains(Request::url(), '/employee')) active @endif sidebar-layout">
+                    <a href="{{ route('employee.index') }}" class="svg-icon">
+                        <i class="bi bi-people"></i>
+                        <span class="ml-2">Employee Master</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>

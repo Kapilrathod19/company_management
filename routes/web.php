@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Employeeontroller;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ProcessController;
@@ -125,6 +126,14 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::post('/sort', [ProcessController::class, 'sort'])->name('process.sort');
     });
     Route::get('/process-item', [ProcessController::class, 'itemList'])->name('process.items');
-Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
+    Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
 
+    Route::prefix('employee')->group(function () {
+        Route::get('/', [Employeeontroller::class, 'index'])->name('employee.index');
+        Route::get('create', [Employeeontroller::class, 'create'])->name('employee.create');
+        Route::post('/store', [Employeeontroller::class, 'store'])->name('employee.store');
+        Route::get('/edit/{id}', [Employeeontroller::class, 'edit'])->name('employee.edit');
+        Route::put('/update/{id}', [Employeeontroller::class, 'update'])->name('employee.update');
+        Route::get('/destroy/{id}', [Employeeontroller::class, 'destroy'])->name('employee.destroy');
+    });
 });
