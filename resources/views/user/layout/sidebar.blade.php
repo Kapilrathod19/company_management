@@ -52,6 +52,12 @@
                         <span class="ml-2">Employee Master</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/machine')) active @endif sidebar-layout">
+                    <a href="{{ route('machine.index') }}" class="svg-icon">
+                        <i class="bi bi-gear"></i>
+                        <span class="ml-2">Machine Master</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>

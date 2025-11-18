@@ -6,8 +6,9 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Employeeontroller;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\SettingController;
@@ -129,11 +130,20 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
 
     Route::prefix('employee')->group(function () {
-        Route::get('/', [Employeeontroller::class, 'index'])->name('employee.index');
-        Route::get('create', [Employeeontroller::class, 'create'])->name('employee.create');
-        Route::post('/store', [Employeeontroller::class, 'store'])->name('employee.store');
-        Route::get('/edit/{id}', [Employeeontroller::class, 'edit'])->name('employee.edit');
-        Route::put('/update/{id}', [Employeeontroller::class, 'update'])->name('employee.update');
-        Route::get('/destroy/{id}', [Employeeontroller::class, 'destroy'])->name('employee.destroy');
+        Route::get('/', [EmployeeController::class, 'index'])->name('employee.index');
+        Route::get('create', [EmployeeController::class, 'create'])->name('employee.create');
+        Route::post('/store', [EmployeeController::class, 'store'])->name('employee.store');
+        Route::get('/edit/{id}', [EmployeeController::class, 'edit'])->name('employee.edit');
+        Route::put('/update/{id}', [EmployeeController::class, 'update'])->name('employee.update');
+        Route::get('/destroy/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy');
+    });
+    
+    Route::prefix('machine')->group(function () {
+        Route::get('/', [MachineController::class, 'index'])->name('machine.index');
+        Route::get('create', [MachineController::class, 'create'])->name('machine.create');
+        Route::post('/store', [MachineController::class, 'store'])->name('machine.store');
+        Route::get('/edit/{id}', [MachineController::class, 'edit'])->name('machine.edit');
+        Route::put('/update/{id}', [MachineController::class, 'update'])->name('machine.update');
+        Route::get('/destroy/{id}', [MachineController::class, 'destroy'])->name('machine.destroy');
     });
 });
