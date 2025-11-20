@@ -18,7 +18,7 @@ class AdminUsersController extends Controller
 
     public function create_user()
     {
-        $companies = User::where('role', 'company')->latest()->get();
+        $companies = Company::latest()->get();
         return view('admin.users.create_user', compact('companies'));
     }
 
@@ -55,7 +55,7 @@ class AdminUsersController extends Controller
     public function edit_user($id)
     {
         $user = CompanyUser::findOrFail($id);
-        $companies = User::where('role', 'company')->latest()->get();
+        $companies = Company::latest()->get();
         return view('admin.users.edit_user', compact('user', 'companies'));
     }
 
