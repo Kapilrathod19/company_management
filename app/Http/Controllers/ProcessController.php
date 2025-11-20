@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Process;
+use App\Models\ProcessMaster;
 use Illuminate\Http\Request;
 
 class ProcessController extends Controller
@@ -96,5 +97,59 @@ class ProcessController extends Controller
             ->get(['process_name', 'details']);
 
         return response()->json($processes);
+    }
+
+
+    public function process_master_index()
+    {
+        $processMasters = ProcessMaster::where('user_id', auth()->id())->latest()->get();
+        return view('user.process_master.index', compact('processMasters'));
+    }
+
+    public function process_master_create()
+    {
+        return view('user.process_master.create');
+    }
+
+    public function process_master_store(Request $request)
+    {
+        $request->validate([
+            'process_number' => 'required',
+            'process_name' => 'required',
+        ]);
+
+        ProcessMaster::create([
+            'user_id' => auth()->id(),
+            'process_number' => $request->process_number,
+            'process_name' => $request->process_name,
+        ]);
+
+        return redirect()->route('process_master.index')->with('success', 'Process Master added successfully!');
+    }
+
+    public function process_master_edit($id)
+    {
+        $processMaster = ProcessMaster::where('user_id', auth()->id())->findOrFail($id);
+        return view('user.process_master.edit', compact('processMaster'));
+    }
+
+    public function process_master_update(Request $request, $id)
+    {
+        $request->validate([
+            'process_number' => 'required',
+            'process_name' => 'required',
+        ]);
+
+        $processMaster = ProcessMaster::findOrFail($id);
+        $processMaster->update($request->only('process_number', 'process_name'));
+
+        return redirect()->route('process_master.index')->with('success', 'Process Master updated successfully!');
+    }
+
+    public function process_master_destroy($id)
+    {
+        ProcessMaster::where('user_id', auth()->id())->findOrFail($id)->delete();
+
+        return redirect()->route('process_master.index')->with('success', 'Process Master deleted successfully!');
     }
 }

@@ -94,7 +94,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/destroy/{id}', [ItemController::class, 'destroy'])->name('item.destroy');
     });
 
-    Route::prefix('process/{item}')->group(function () {
+    Route::prefix('process-item/{item}')->group(function () {
         Route::get('/', [ProcessController::class, 'index'])->name('process.index');
         Route::get('/create', [ProcessController::class, 'create'])->name('process.create');
         Route::post('/store', [ProcessController::class, 'store'])->name('process.store');
@@ -107,6 +107,15 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
     Route::get('/process-item', [ProcessController::class, 'itemList'])->name('process.items');
     Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
+
+    Route::prefix('process_master')->group(function () {
+        Route::get('/', [ProcessController::class, 'process_master_index'])->name('process_master.index');
+        Route::get('create', [ProcessController::class, 'process_master_create'])->name('process_master.create');
+        Route::post('/store', [ProcessController::class, 'process_master_store'])->name('process_master.store');
+        Route::get('/edit/{id}', [ProcessController::class, 'process_master_edit'])->name('process_master.edit');
+        Route::put('/update/{id}', [ProcessController::class, 'process_master_update'])->name('process_master.update');
+        Route::get('/destroy/{id}', [ProcessController::class, 'process_master_destroy'])->name('process_master.destroy');
+    });
 
     Route::prefix('employee')->group(function () {
         Route::get('/', [EmployeeController::class, 'index'])->name('employee.index');
