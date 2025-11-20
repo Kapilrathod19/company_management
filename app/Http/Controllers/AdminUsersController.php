@@ -27,7 +27,7 @@ class AdminUsersController extends Controller
         $validated = $request->validate([
             'company_id' => 'required',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:company_users,email',
             'password' => 'required|string|min:6',
             'mobile' => 'required|string|max:15',
             'department' => 'required|string|max:255',
