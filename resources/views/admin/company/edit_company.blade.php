@@ -48,20 +48,15 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="name" class="form-label">Company Name</label>
                                         <input type="text" name="name" id="name" class="form-control"
-                                            value="{{ old('name', $company->user->name) }}">
+                                            value="{{ old('name', $company->name) }}">
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="email" class="form-label">Email</label>
                                         <input type="email" name="email" id="email" class="form-control"
-                                            value="{{ old('email', $company->user->email) }}">
+                                            value="{{ old('email', $company->email) }}">
                                     </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Password (Leave blank to keep old)</label>
-                                        <input type="password" name="password" id="password" class="form-control">
-                                    </div>
-
+                                    
                                     <div class="col-md-6 mb-3">
                                         <label for="phone_number" class="form-label">Phone Number</label>
                                         <input type="text" name="phone_number" id="phone_number" class="form-control"
@@ -70,12 +65,12 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="address" class="form-label">Office Address</label>
-                                        <textarea name="address" id="address" rows="2" class="form-control">{{ old('address', $company->address) }}</textarea>
+                                        <textarea name="address" id="address" rows="1" class="form-control">{{ old('address', $company->address) }}</textarea>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="alternate_address" class="form-label">Factory Address</label>
-                                        <textarea name="alternate_address" id="alternate_address" rows="2" class="form-control">{{ old('alternate_address', $company->alternate_address) }}</textarea>
+                                        <textarea name="alternate_address" id="alternate_address" rows="1" class="form-control">{{ old('alternate_address', $company->alternate_address) }}</textarea>
                                     </div>
 
                                     <div class="col-md-6 mb-3">

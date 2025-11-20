@@ -57,13 +57,7 @@
                                             value="{{ old('email') }}">
                                         <span class="text-danger"></span>
                                     </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Password</label>
-                                        <input type="password" name="password" id="password" class="form-control">
-                                        <span class="text-danger"></span>
-                                    </div>
-
+                                 
                                     <div class="col-md-6 mb-3">
                                         <label for="phone_number" class="form-label">Phone Number</label>
                                         <input type="text" name="phone_number" id="phone_number" class="form-control"
@@ -73,13 +67,13 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="address" class="form-label">Office Address</label>
-                                        <textarea name="address" id="address" rows="2" class="form-control">{{ old('address') }}</textarea>
+                                        <textarea name="address" id="address" rows="1" class="form-control">{{ old('address') }}</textarea>
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="alternate_address" class="form-label">Factory Address</label>
-                                        <textarea name="alternate_address" id="alternate_address" rows="2" class="form-control">{{ old('alternate_address') }}</textarea>
+                                        <textarea name="alternate_address" id="alternate_address" rows="1" class="form-control">{{ old('alternate_address') }}</textarea>
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -164,7 +158,6 @@
             var fieldsToValidate = [
                 '#name',
                 '#email',
-                '#password',
                 '#phone_number',
                 '#address',
                 '#state',

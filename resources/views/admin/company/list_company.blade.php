@@ -42,8 +42,8 @@
                                         @foreach ($companies as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $item->user->name ?? '' }}</td>
-                                                <td>{{ $item->user->email ?? '' }}</td>
+                                                <td>{{ $item->name ?? '' }}</td>
+                                                <td>{{ $item->email ?? '' }}</td>
                                                 <td>{{ $item->phone_number ?? '' }}</td>
                                                 <td>{{ $item->address ?? '' }}</td>
                                                 <td>{{ $item->alternate_address ?? '' }}</td>

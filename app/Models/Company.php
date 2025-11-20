@@ -10,7 +10,8 @@ class Company extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'name',
+        'email',
         'phone_number',
         'address',
         'alternate_address',
@@ -22,11 +23,6 @@ class Company extends Model
         'msme_no',
         'state_code',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function state()
     {

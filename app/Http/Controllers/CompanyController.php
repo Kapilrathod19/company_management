@@ -13,7 +13,7 @@ class CompanyController extends Controller
 {
     public function company()
     {
-        $companies = Company::with('user', 'state', 'city')->latest()->get();
+        $companies = Company::with('state', 'city')->latest()->get();
         return view('admin.company.list_company', compact('companies'));
     }
 
@@ -28,7 +28,6 @@ class CompanyController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
             'phone_number' => 'required|string|max:15',
             'address' => 'required|string',
             'alternate_address' => 'nullable|string',
@@ -42,13 +41,6 @@ class CompanyController extends Controller
         ]);
 
         try {
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'ipass' => $validated['password'],
-                'role' => 'company',
-            ]);
 
             $imageName = null;
             if ($request->hasFile('image')) {
@@ -58,7 +50,8 @@ class CompanyController extends Controller
             }
 
             Company::create([
-                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
                 'phone_number' => $validated['phone_number'],
                 'address' => $validated['address'],
                 'alternate_address' => $validated['alternate_address'] ?? null,
@@ -89,12 +82,9 @@ class CompanyController extends Controller
     public function update_company(Request $request, $id)
     {
         $Company = Company::findOrFail($id);
-        $user = User::findOrFail($Company->user_id);
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
+            'email' => 'required|email',
             'phone_number' => 'required|string|max:15',
             'address' => 'required|string',
             'alternate_address' => 'nullable|string',
@@ -108,15 +98,6 @@ class CompanyController extends Controller
         ]);
 
         try {
-            $user->update([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => $request->filled('password')
-                    ? Hash::make($validated['password'])
-                    : $user->password,
-                'ipass' => $request->filled('password') ? $validated['password'] : $user->ipass,
-            ]);
-
             $imageName = $Company->image;
             if ($request->hasFile('image')) {
                 if ($Company->image && file_exists(public_path('company_images/' . $Company->image))) {
@@ -128,6 +109,8 @@ class CompanyController extends Controller
             }
 
             $Company->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
                 'phone_number' => $validated['phone_number'],
                 'address' => $validated['address'],
                 'alternate_address' => $validated['alternate_address'] ?? null,
@@ -158,13 +141,6 @@ class CompanyController extends Controller
                 $imagePath = public_path('company_images/' . $company->image);
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
-                }
-            }
-
-            if ($company->user_id) {
-                $user = User::find($company->user_id);
-                if ($user) {
-                    $user->delete();
                 }
             }
             $company->delete();
