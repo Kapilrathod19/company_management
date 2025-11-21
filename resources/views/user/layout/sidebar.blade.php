@@ -64,6 +64,12 @@
                         <span class="ml-2">Machine Master</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/sales_order')) active @endif sidebar-layout">
+                    <a href="{{ route('sales_order.index') }}" class="svg-icon">
+                        <i class="bi bi-cart4"></i>
+                        <span class="ml-2">Sales Order</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>

@@ -11,6 +11,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ProcessController;
+use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
@@ -134,5 +135,14 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/edit/{id}', [MachineController::class, 'edit'])->name('machine.edit');
         Route::put('/update/{id}', [MachineController::class, 'update'])->name('machine.update');
         Route::get('/destroy/{id}', [MachineController::class, 'destroy'])->name('machine.destroy');
+    });
+    
+    Route::prefix('sales_order')->group(function () {
+        Route::get('/', [SalesOrderController::class, 'index'])->name('sales_order.index');
+        Route::get('create', [SalesOrderController::class, 'create'])->name('sales_order.create');
+        Route::post('/store', [SalesOrderController::class, 'store'])->name('sales_order.store');
+        Route::get('/edit/{id}', [SalesOrderController::class, 'edit'])->name('sales_order.edit');
+        Route::put('/update/{id}', [SalesOrderController::class, 'update'])->name('sales_order.update');
+        Route::get('/destroy/{id}', [SalesOrderController::class, 'destroy'])->name('sales_order.destroy');
     });
 });
