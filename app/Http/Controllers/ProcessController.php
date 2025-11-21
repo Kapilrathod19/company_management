@@ -12,63 +12,74 @@ class ProcessController extends Controller
     public function itemList()
     {
         $items = Item::where('user_id', auth()->id())->latest()->get();
-        return view('user.process.items', compact('items'));
+        $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
+
+        return view('user.process.items', compact('items', 'ProcessMaster'));
     }
 
     public function index($itemId)
     {
         $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
 
-        $processes = Process::where('item_id', $itemId)
+        $processes = Process::with('processMaster')->where('item_id', $itemId)
             ->orderBy('position')
             ->get();
 
         return view('user.process.index', compact('item', 'processes'));
     }
 
+
     public function create($itemId)
     {
         $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
-        return view('user.process.create', compact('item'));
+        $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
+        return view('user.process.create', compact('item', 'ProcessMaster'));
     }
 
-    public function store(Request $request, $itemId)
+    public function storeMultiple(Request $request, $itemId)
     {
         $request->validate([
-            'process_name' => 'required',
-            'details' => 'nullable',
+            'process_id.*' => 'required'
         ]);
 
         $maxPosition = Process::where('item_id', $itemId)->max('position') ?? 0;
 
-        Process::create([
-            'item_id' => $itemId,
-            'process_name' => $request->process_name,
-            'details' => $request->details,
-            'position' => $maxPosition + 1,
-        ]);
+        $processIds = $request->process_id;
+
+        foreach ($processIds as $pid) {
+            $maxPosition++;
+
+            Process::create([
+                'item_id' => $itemId,
+                'process_id' => $pid,
+                'position' => $maxPosition,
+            ]);
+        }
 
         return redirect()->route('process.index', $itemId)
-            ->with('success', 'Process added successfully!');
+            ->with('success', 'Processes added successfully!');
     }
+
 
     public function edit($itemId, $id)
     {
         $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
         $process = Process::findOrFail($id);
+        $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
 
-        return view('user.process.edit', compact('item', 'process'));
+        return view('user.process.edit', compact('item', 'process', 'ProcessMaster'));
     }
 
     public function update(Request $request, $itemId, $id)
     {
         $request->validate([
-            'process_name' => 'required',
-            'details' => 'nullable',
+            'process_id' => 'required',
         ]);
 
         $process = Process::findOrFail($id);
-        $process->update($request->only('process_name', 'details'));
+        $process->update([
+            'process_id' => $request->process_id,
+        ]);
 
         return redirect()->route('process.index', $itemId)
             ->with('success', 'Process updated successfully!');
@@ -90,15 +101,14 @@ class ProcessController extends Controller
 
         return response()->json(['status' => 'success']);
     }
+
     public function getProcesses($itemId)
     {
-        $processes = Process::where('item_id', $itemId)
-            ->orderBy('position')
-            ->get(['process_name', 'details']);
+        $processes = Process::with('processMaster')->where('item_id', $itemId)
+            ->orderBy('position')->get();
 
         return response()->json($processes);
     }
-
 
     public function process_master_index()
     {

@@ -12,12 +12,16 @@
 
                 <div class="mb-3">
                     <label>Process Name</label>
-                    <input type="text" name="process_name" class="form-control" value="{{ $process->process_name }}">
-                </div>
-
-                <div class="mb-3">
-                    <label>Details</label>
-                    <textarea name="details" class="form-control">{{ $process->details }}</textarea>
+                    @if ($ProcessMaster->count() > 0)
+                        <select name="process_id" class="form-control">
+                            <option value="">Select Process</option>
+                            @foreach ($ProcessMaster as $pm)
+                                <option value="{{ $pm->id }}" {{ $process->process_id == $pm->id ? 'selected' : '' }}>
+                                    {{ $pm->process_number }} - {{ $pm->process_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
 
                 <button class="btn btn-primary">Update</button>

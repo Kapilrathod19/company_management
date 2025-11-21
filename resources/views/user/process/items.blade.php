@@ -35,8 +35,15 @@
                                                 <td>{{ $item->description ?? '' }}</td>
                                                 <td>
                                                     <a href="{{ route('process.index', $item->id) }}"
-                                                       class="btn btn-primary btn-sm mb-2">
-                                                        <i class="bi bi-diagram-3"></i> View Processes
+                                                        class="btn btn-primary btn-sm mb-2"
+                                                        title="View Processes" data-toggle="tooltip" data-placement="top">
+                                                        <i class="bi bi-diagram-3"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0)"
+                                                        onclick="openProcessModal({{ $item->id }}, '{{ $item->part_number }}')"
+                                                        class="btn btn-success btn-sm mb-2"
+                                                        title="Add Process" data-toggle="tooltip" data-placement="top">
+                                                        <i class="bi bi-plus"></i>
                                                     </a>
                                                 </td>
                                             </tr>
@@ -51,5 +58,121 @@
             </div>
         </div>
     </div>
+
+    <!-- Process Add Modal -->
+    <div class="modal fade" id="processModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form id="processForm" method="POST">
+                @csrf
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="processModalTitle">Add Processes</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <table class="table table-bordered" id="processTable">
+                            <thead>
+                                <tr>
+                                    <th>Process</th>
+                                    <th width="50px">
+                                        <button type="button" class="btn btn-success btn-sm" id="addRowBtn">+</button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select name="process_id[]" class="form-control process-select">
+                                            <option value="">Select Process</option>
+                                            @foreach ($ProcessMaster as $pm)
+                                                <option value="{{ $pm->id }}">
+                                                    {{ $pm->process_number }} - {{ $pm->process_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm removeRow">X</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div id="errorBox" class="text-danger"></div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save All</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
+@section('scripts')
+    <script>
+        function openProcessModal(itemId, partNumber) {
+
+            document.getElementById("processForm").action =
+                "/user/process-item/store-multiple/" + itemId;
+
+            document.getElementById("processModalTitle").innerHTML =
+                "Add Process for Item: <strong>" + partNumber + "</strong>";
+
+            $("#processModal").modal('show');
+        }
+
+
+        // Add new process row
+        $("#addRowBtn").click(function() {
+            let row = `
+            <tr>
+                <td>
+                    <select name="process_id[]" class="form-control process-select">
+                        <option value="">Select Process</option>
+                        @foreach ($ProcessMaster as $pm)
+                            <option value="{{ $pm->id }}">
+                                {{ $pm->process_number }} - {{ $pm->process_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm removeRow">X</button>
+                </td>
+            </tr>
+        `;
+            $("#processTable tbody").append(row);
+        });
+
+        // Remove row
+        $(document).on("click", ".removeRow", function() {
+            $(this).closest("tr").remove();
+        });
+
+        // Validation before submit
+        $("#processForm").submit(function(e) {
+            let valid = true;
+            $("#errorBox").html("");
+
+            $(".process-select").each(function() {
+                if ($(this).val() === "") {
+                    valid = false;
+                }
+            });
+
+            if (!valid) {
+                e.preventDefault();
+                $("#errorBox").html("Please select process in all rows.");
+            }
+        });
+    </script>
+
+@endsection

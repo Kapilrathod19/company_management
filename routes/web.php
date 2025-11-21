@@ -97,14 +97,15 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::prefix('process-item/{item}')->group(function () {
         Route::get('/', [ProcessController::class, 'index'])->name('process.index');
         Route::get('/create', [ProcessController::class, 'create'])->name('process.create');
-        Route::post('/store', [ProcessController::class, 'store'])->name('process.store');
         Route::get('/edit/{id}', [ProcessController::class, 'edit'])->name('process.edit');
         Route::put('/update/{id}', [ProcessController::class, 'update'])->name('process.update');
         Route::delete('/delete/{id}', [ProcessController::class, 'destroy'])->name('process.delete');
-
+        
         // Drag & Drop Sort
         Route::post('/sort', [ProcessController::class, 'sort'])->name('process.sort');
     });
+    Route::post('process-item/store-multiple/{itemId}', [ProcessController::class, 'storeMultiple'])->name('process.storeMultiple');
+
     Route::get('/process-item', [ProcessController::class, 'itemList'])->name('process.items');
     Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
 

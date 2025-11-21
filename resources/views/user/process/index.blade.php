@@ -5,15 +5,22 @@
     <div class="content-page">
         <div class="container-fluid">
 
-            <h4>Processes for Item: <b>{{ $item->part_number }}</b></h4>
-
-            <a href="{{ route('process.create', $item->id) }}" class="btn btn-primary mb-3">
-                + Add Process
-            </a>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                        <h5 class="card-title">Processes for Item: <b>{{ $item->part_number }}</b></h5>
+                    </div>
+                    <div class="header-action">
+                        <a href="{{ route('process.create', $item->id) }}" class="btn btn-primary">
+                            + Add Process
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <div class="list-group-item bg-light fw-bold d-flex justify-content-between">
+                <div style="width: 40%">Process Number</div>
                 <div style="width: 40%">Process Name</div>
-                <div style="width: 40%">Details</div>
                 <div style="width: 20%">Action</div>
             </div>
 
@@ -23,11 +30,11 @@
                         data-id="{{ $p->id }}">
 
                         <div style="width: 40%">
-                            {{ $p->process_name }}
+                            {{ $p->processMaster->process_number ?? '—' }}
                         </div>
 
                         <div style="width: 40%">
-                            {{ $p->details ?? '—' }}
+                            {{ $p->processMaster->process_name ?? '—' }}
                         </div>
 
                         <div style="width: 20%">

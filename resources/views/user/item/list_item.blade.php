@@ -44,16 +44,16 @@
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>
                                                     <button class="btn btn-success btn-sm mb-2 show-process-btn"
-                                                        data-id="{{ $item->id }}" title="View Processes">
+                                                        data-id="{{ $item->id }}" title="View Processes" data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-diagram-3"></i>
                                                     </button>
                                                     <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('item.edit', $item->id) }}" role="button">
+                                                        href="{{ route('item.edit', $item->id) }}" role="button" title="Edit Item" data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <a class="btn btn-danger btn-sm delete-confirm mb-2"
                                                         href="javascript:void(0)" data-id="{{ $item->id }}"
-                                                        role="button">
+                                                        role="button" title="Delete Item" data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-trash-fill"></i>
                                                     </a>
                                                 </td>
@@ -85,8 +85,8 @@
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Process Number</th>
                                 <th>Process Name</th>
-                                <th>Details</th>
                             </tr>
                         </thead>
                         <tbody id="processData">
@@ -152,8 +152,8 @@
                                     rows += `
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${p.process_name}</td>
-                                    <td>${p.details ?? '—'}</td>
+                                    <td>${p.process_master.process_number}</td>
+                                    <td>${p.process_master.process_name}</td>
                                 </tr>
                             `;
                                 });
