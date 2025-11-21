@@ -17,23 +17,20 @@ class ProcessController extends Controller
         return view('user.process.items', compact('items', 'ProcessMaster'));
     }
 
-    public function index($itemId)
+    public function index(Request $request, $itemId)
     {
         $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
 
-        $processes = Process::with('processMaster')->where('item_id', $itemId)
+        $processes = Process::with('processMaster')
+            ->where('item_id', $itemId)
             ->orderBy('position')
             ->get();
 
+        if ($request->ajax()) {
+            return view('user.process.index', compact('item', 'processes'))->render();
+        }
+
         return view('user.process.index', compact('item', 'processes'));
-    }
-
-
-    public function create($itemId)
-    {
-        $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
-        $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
-        return view('user.process.create', compact('item', 'ProcessMaster'));
     }
 
     public function storeMultiple(Request $request, $itemId)
@@ -56,19 +53,21 @@ class ProcessController extends Controller
             ]);
         }
 
-        return redirect()->route('process.index', $itemId)
-            ->with('success', 'Processes added successfully!');
+        return redirect()->back()->with('success', 'Process added successfully!');
     }
 
 
     public function edit($itemId, $id)
     {
-        $item = Item::where('user_id', auth()->id())->findOrFail($itemId);
         $process = Process::findOrFail($id);
         $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
 
-        return view('user.process.edit', compact('item', 'process', 'ProcessMaster'));
+        return response()->json([
+            'process' => $process,
+            'masters' => $ProcessMaster
+        ]);
     }
+
 
     public function update(Request $request, $itemId, $id)
     {
@@ -81,17 +80,15 @@ class ProcessController extends Controller
             'process_id' => $request->process_id,
         ]);
 
-        return redirect()->route('process.index', $itemId)
-            ->with('success', 'Process updated successfully!');
+        return response()->json(['success' => true]);
     }
 
     public function destroy($itemId, $id)
     {
         Process::findOrFail($id)->delete();
-
-        return redirect()->route('process.index', $itemId)
-            ->with('success', 'Process deleted successfully!');
+        return response()->json(['success' => true]);
     }
+
 
     public function sort(Request $request, $itemId)
     {

@@ -1,113 +1,172 @@
-@extends('user.layout.main_layout')
-@section('title', 'Item Processes')
+<div class="list-group-item bg-light fw-bold d-flex justify-content-between">
+    <div style="width: 40%">Process Number</div>
+    <div style="width: 40%">Process Name</div>
+    <div style="width: 20%">Action</div>
+</div>
 
-@section('content')
-    <div class="content-page">
-        <div class="container-fluid">
+<ul id="sortable" class="list-group">
+    @foreach ($processes as $p)
+        <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ $p->id }}">
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <div class="header-title">
-                        <h5 class="card-title">Processes for Item: <b>{{ $item->part_number }}</b></h5>
-                    </div>
-                    <div class="header-action">
-                        <a href="{{ route('process.create', $item->id) }}" class="btn btn-primary">
-                            + Add Process
-                        </a>
-                    </div>
+            <div style="width: 40%">
+                {{ $p->processMaster->process_number }}
+            </div>
+
+            <div style="width: 40%">
+                {{ $p->processMaster->process_name }}
+            </div>
+
+            <div style="width: 20%">
+
+                <a href="javascript:void(0);" onclick="openEditProcess({{ $item->id }}, {{ $p->id }})"
+                    class="btn btn-sm btn-info">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+
+                <button type="button" class="btn btn-sm btn-danger delete-confirm"
+                    data-url="{{ route('process.delete', [$item->id, $p->id]) }}">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </div>
+
+        </li>
+    @endforeach
+</ul>
+<script>
+    function openEditProcess(itemId, processId) {
+
+        $("#editProcessBody").html(`
+            <div class='text-center py-5'>
+                <div class='spinner-border'></div>
+            </div>
+        `);
+
+        $("#editProcessModal").modal("show");
+
+        $.get(`/user/process-item/${itemId}/edit/${processId}`, function(response) {
+
+            let html = `
+                <div class="form-group">
+                    <label>Select Process</label>
+                    <select name="process_id" class="form-control">
+                        ${response.masters.map(pm => `
+                            <option value="${pm.id}"
+                                ${pm.id == response.process.process_id ? "selected" : ""}>
+                                ${pm.process_number} - ${pm.process_name}
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
+            `;
+
+            $("#editProcessBody").html(html);
+
+            $("#editProcessForm").attr("action",
+                `/user/process-item/${itemId}/update/${processId}`
+            );
+        });
+    }
+
+    $("#editProcessForm").off("submit").on("submit", function(e) {
+        e.preventDefault();
+
+        let url = $(this).attr("action");
+        let formData = $(this).serialize();
+
+        $("#editProcessBody").html(`
+            <div class='text-center py-5'>
+                <div class='spinner-border'></div>
             </div>
+        `);
 
-            <div class="list-group-item bg-light fw-bold d-flex justify-content-between">
-                <div style="width: 40%">Process Number</div>
-                <div style="width: 40%">Process Name</div>
-                <div style="width: 20%">Action</div>
-            </div>
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: formData,
+            success: function() {
 
-            <ul id="sortable" class="list-group">
-                @foreach ($processes as $index => $p)
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        data-id="{{ $p->id }}">
+                $("#editProcessModal").modal("hide");
 
-                        <div style="width: 40%">
-                            {{ $p->processMaster->process_number ?? '—' }}
-                        </div>
+                openProcessList(currentItemId);
 
-                        <div style="width: 40%">
-                            {{ $p->processMaster->process_name ?? '—' }}
-                        </div>
-
-                        <div style="width: 20%">
-                            <a href="{{ route('process.edit', [$item->id, $p->id]) }}" class="btn btn-sm btn-info"><i
-                                    class="bi bi-pencil-square"></i></a>
-
-                            <button type="button" class="btn btn-sm btn-danger delete-confirm"
-                                data-url="{{ route('process.delete', [$item->id, $p->id]) }}">
-                                <i class="bi bi-trash-fill"></i>
-                            </button>
-                        </div>
-
-                    </li>
-                @endforeach
-            </ul>
-
-        </div>
-    </div>
-@endsection
-
-@section('scripts')
-    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        // Sorting
-        $("#sortable").sortable({
-            update: function(event, ui) {
-                var order = [];
-                $("#sortable li").each(function(index) {
-                    order.push($(this).data('id'));
-                });
-
-                $.post("{{ route('process.sort', $item->id) }}", {
-                    _token: "{{ csrf_token() }}",
-                    order: order
+                Swal.fire({
+                    icon: "success",
+                    text: "Process updated!",
+                    timer: 1200,
+                    showConfirmButton: false
                 });
             }
         });
+    });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.delete-confirm').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    let deleteUrl = this.getAttribute('data-url');
 
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "This process will be deleted!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = deleteUrl;
+    // DELETE
+    document.querySelectorAll('.delete-confirm').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            let deleteUrl = this.getAttribute('data-url');
 
-                            form.innerHTML = `
-                                @csrf
-                                @method('DELETE')
-                            `;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This process will be deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-                            document.body.appendChild(form);
-                            form.submit();
+                    $.ajax({
+                        url: deleteUrl,
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: "DELETE"
+                        },
+                        success: function() {
+                            button.closest("li").remove();
+                            Swal.fire({
+                                icon: "success",
+                                text: "Process updated!",
+                                timer: 1200,
+                                showConfirmButton: false
+                            });
                         }
                     });
-                });
+
+                }
             });
         });
-    </script>
-@endsection
+    });
+    
+    $("#sortable").sortable({
+        placeholder: "ui-state-highlight",
+        update: function(event, ui) {
 
-@section('footer')
+            let order = [];
+            $("#sortable li").each(function() {
+                order.push($(this).data("id"));
+            });
+
+            $.ajax({
+                url: "/user/process-item/{{ $item->id }}/sort",
+                method: "POST",
+                data: {
+                    order: order,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    Swal.fire({
+                        icon: "success",
+                        text: "Position updated!",
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+    });
+
+    $("#sortable").disableSelection();
+</script>

@@ -34,15 +34,16 @@
                                                 <td>{{ $item->part_number ?? '' }}</td>
                                                 <td>{{ $item->description ?? '' }}</td>
                                                 <td>
-                                                    <a href="{{ route('process.index', $item->id) }}"
-                                                        class="btn btn-primary btn-sm mb-2"
-                                                        title="View Processes" data-toggle="tooltip" data-placement="top">
+                                                    <a href="javascript:void(0);"
+                                                        onclick="openProcessList({{ $item->id }}, '{{ $item->part_number }}')"
+                                                        class="btn btn-primary btn-sm mb-2" title="View Processes" data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-diagram-3"></i>
                                                     </a>
+                                                    
                                                     <a href="javascript:void(0)"
                                                         onclick="openProcessModal({{ $item->id }}, '{{ $item->part_number }}')"
-                                                        class="btn btn-success btn-sm mb-2"
-                                                        title="Add Process" data-toggle="tooltip" data-placement="top">
+                                                        class="btn btn-success btn-sm mb-2" title="Add Process"
+                                                        data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-plus"></i>
                                                     </a>
                                                 </td>
@@ -55,6 +56,27 @@
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Processes Modal -->
+    <div class="modal fade" id="viewProcessModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewProcessTitle">Item Processes</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div class="modal-body" id="processListContainer">
+                    <!-- AJAX Loaded Content Here -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -114,10 +136,59 @@
         </div>
     </div>
 
+    <!-- Edit Process Modal -->
+    <div class="modal fade" id="editProcessModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="editProcessForm" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Process</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body" id="editProcessBody">
+                        <!-- AJAX Loaded Form -->
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Update</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+
 @endsection
 
 @section('scripts')
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        function openProcessList(itemId, partNumber) {
+            currentItemId = itemId;
+
+            $("#viewProcessTitle").html(`Processes for Item: <strong>` + partNumber + `</strong>`);
+
+            $("#processListContainer").html(`
+                <div class='text-center py-5'>
+                    <div class='spinner-border'></div>
+                </div>
+            `);
+
+            $("#viewProcessModal").modal("show");
+
+            $.get("/user/process-item/" + itemId, function(html) {
+                $("#processListContainer").html(html);
+            });
+        }
+
         function openProcessModal(itemId, partNumber) {
 
             document.getElementById("processForm").action =
@@ -128,7 +199,6 @@
 
             $("#processModal").modal('show');
         }
-
 
         // Add new process row
         $("#addRowBtn").click(function() {
