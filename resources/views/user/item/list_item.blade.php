@@ -19,6 +19,18 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="me-2"><strong>Filter by Category:</strong></label>
+                                        <select id="categoryFilter" class="form-control d-inline-block" style="width: auto;">
+                                            <option value="">All Categories</option>
+                                            @foreach ($items->groupBy('category') as $category => $group)
+                                                <option value="{{ $category }}">{{ $category }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <table id="datatable" class="table data-table table-striped table-bordered">
                                     <thead>
                                         <tr>
@@ -44,16 +56,19 @@
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>
                                                     <button class="btn btn-success btn-sm mb-2 show-process-btn"
-                                                        data-id="{{ $item->id }}" title="View Processes" data-toggle="tooltip" data-placement="top">
+                                                        data-id="{{ $item->id }}" title="View Processes"
+                                                        data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-diagram-3"></i>
                                                     </button>
                                                     <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('item.edit', $item->id) }}" role="button" title="Edit Item" data-toggle="tooltip" data-placement="top">
+                                                        href="{{ route('item.edit', $item->id) }}" role="button"
+                                                        title="Edit Item" data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </a>
                                                     <a class="btn btn-danger btn-sm delete-confirm mb-2"
                                                         href="javascript:void(0)" data-id="{{ $item->id }}"
-                                                        role="button" title="Delete Item" data-toggle="tooltip" data-placement="top">
+                                                        role="button" title="Delete Item" data-toggle="tooltip"
+                                                        data-placement="top">
                                                         <i class="bi bi-trash-fill"></i>
                                                     </a>
                                                 </td>
@@ -168,5 +183,16 @@
             });
 
         });
-    </script>
+        
+    $(document).ready(function () {
+        var table = $('#datatable').DataTable();
+        // CATEGORY FILTER
+        $('#categoryFilter').on('change', function () {
+            let value = $(this).val();
+            table.column(1).search(value).draw();
+        });
+
+    });
+</script>
+
 @endsection
