@@ -153,4 +153,20 @@ class SalesOrderController extends Controller
 
         return redirect()->back()->with('error', 'Sales Order not found.');
     }
+
+    public function getItem($id)
+    {
+        $item = Item::where('user_id', auth()->id())->find($id);
+
+        if (!$item) {
+            return response()->json(['status' => false]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'description' => $item->description,
+            'unit' => $item->unit
+        ]);
+    }
+
 }

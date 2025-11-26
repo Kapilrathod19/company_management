@@ -73,7 +73,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Part Number</label>
-                                        <select name="part_no" class="form-control">
+                                        <select name="part_no" class="form-control" id="part_no">
                                             <option value="">Select Part Number</option>
                                             @foreach ($items as $part)
                                                 <option value="{{ $part->id }}"
@@ -87,13 +87,13 @@
 
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Description</label>
-                                        <textarea name="description" class="form-control">{{ $salesOrder->description }}</textarea>
+                                        <textarea name="description" id="description" class="form-control">{{ $salesOrder->description }}</textarea>
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Unit</label>
-                                        <input type="text" name="unit" class="form-control"
+                                        <input type="text" name="unit" id="unit" class="form-control"
                                             value="{{ $salesOrder->unit }}">
                                         <span class="text-danger"></span>
                                     </div>
@@ -183,6 +183,31 @@
 
             $('#total_weight').val(total.toFixed(2));
         }
+
+        // Auto load description and unit when selecting part number
+        $('#part_no').on('change', function() {
+            var itemId = $(this).val();
+
+            if (itemId) {
+                $.ajax({
+                    url: "{{ route('item.get', '') }}/" + itemId,
+                    type: "GET",
+                    success: function(res) {
+                        if (res.status) {
+                            $('#description').val(res.description).trigger('input');
+                            $('#unit').val(res.unit).trigger('input');
+                        } else {
+                            $('#description').val('');
+                            $('#unit').val('');
+                        }
+                    }
+                });
+            } else {
+                $('#description').val('');
+                $('#unit').val('');
+            }
+        });
+
 
         // Trigger on Qty or Weight input
         $('#qty, #weight').on('input', function() {

@@ -177,6 +177,31 @@
             $('#total_weight').val(total.toFixed(2));
         }
 
+        // When Part Number changes → fetch item details
+        $('#part_no').on('change', function() {
+            var itemId = $(this).val();
+
+            if (itemId) {
+                $.ajax({
+                    url: "{{ route('item.get', '') }}/" + itemId,
+                    type: "GET",
+                    success: function(res) {
+                        if (res.status) {
+                            $('#description').val(res.description).trigger('input');
+                            $('#unit').val(res.unit).trigger('input');
+                        } else {
+                            $('#description').val('');
+                            $('#unit').val('');
+                        }
+                    }
+                });
+            } else {
+                $('#description').val('');
+                $('#unit').val('');
+            }
+        });
+
+
         // Trigger on Qty or Weight input
         $('#qty, #weight').on('input', function() {
             calculateTotalWeight();
