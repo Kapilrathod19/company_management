@@ -70,6 +70,12 @@
                         <span class="ml-2">Sales Order</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/supplier')) active @endif sidebar-layout">
+                    <a href="{{ route('supplier.index') }}" class="svg-icon">
+                        <i class="bi bi-truck"></i>
+                        <span class="ml-2">Supplier</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>

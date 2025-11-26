@@ -13,6 +13,7 @@ use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -147,4 +148,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
     Route::get('get-item/{id}', [SalesOrderController::class, 'getItem'])->name('item.get');
 
+    Route::prefix('supplier')->group(function () {
+        Route::get('/', [SupplierController::class, 'index'])->name('supplier.index');
+        Route::get('create', [SupplierController::class, 'create'])->name('supplier.create');
+        Route::post('/store', [SupplierController::class, 'store'])->name('supplier.store');
+        Route::get('/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
+        Route::put('/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
+        Route::get('/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+    });
 });
