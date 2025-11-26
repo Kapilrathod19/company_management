@@ -32,6 +32,8 @@
                                             <th>Qty</th>
                                             <th>Weight</th>
                                             <th>Total Weight</th>
+                                            <th>Unit No</th>
+                                            <th>Rev No</th>
                                             <th>Delivery Date</th>
                                             <th>Drawing Attachment</th>
                                             <th>Action</th>
@@ -50,6 +52,8 @@
                                                 <td>{{ $item->qty ?? '' }}</td>
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>{{ $item->total_weight ?? '' }}</td>
+                                                <td>{{ $item->unit_no ?? '' }}</td>
+                                                <td>{{ $item->rev_no ?? '' }}</td>
                                                 <td class="text-nowrap">
                                                     {{ date('d-m-Y', strtotime($item->delivery_date)) }}</td>
                                                 <td>

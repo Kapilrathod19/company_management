@@ -25,7 +25,6 @@ class MachineController extends Controller
             'category' => 'required|string|max:255',
             'machine_no' => 'required|string|max:255',
             'machine_name' => 'required|string|max:100',
-            'calibration_date' => 'required|date',
             'remark' => 'nullable|string',
         ]);
 
@@ -54,7 +53,6 @@ class MachineController extends Controller
             'category' => 'required|string|max:255',
             'machine_no' => 'required|string|max:255',
             'machine_name' => 'required|string|max:100',
-            'calibration_date' => 'required|date',
             'remark' => 'nullable|string',
         ]);
 

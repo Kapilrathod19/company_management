@@ -59,6 +59,8 @@ class SalesOrderController extends Controller
         $totalWeight = (float)$request->qty * (float)$request->weight;
         $salesOrder->total_weight = number_format($totalWeight, 2, '.', '');
 
+        $salesOrder->unit_no          = $request->unit_no;
+        $salesOrder->rev_no           = $request->rev_no;
         $salesOrder->delivery_date    = $request->delivery_date;
         $salesOrder->drawing_attachment = $drawing_attachment;
         $salesOrder->save();
@@ -123,6 +125,8 @@ class SalesOrderController extends Controller
         $salesOrder->qty             = $request->qty;
         $salesOrder->weight          = $request->weight;
         $salesOrder->total_weight = number_format(($request->qty * $request->weight), 2, '.', '');
+        $salesOrder->unit_no        = $request->unit_no;
+        $salesOrder->rev_no         = $request->rev_no;
         $salesOrder->delivery_date   = $request->delivery_date;
 
         $salesOrder->save();

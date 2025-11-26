@@ -120,10 +120,6 @@
                     name: 'Machine Name'
                 },
                 {
-                    id: '#calibration_date',
-                    name: 'Calibration Date'
-                },
-                {
                     id: '#remark',
                     name: 'Remark'
                 }
