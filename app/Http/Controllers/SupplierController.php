@@ -66,7 +66,7 @@ class SupplierController extends Controller
 
             return redirect()
                 ->route('supplier.index')
-                ->with('success', 'Supplier added successfully.');
+                ->with('success', 'Supplier PO added successfully.');
         } catch (\Exception $e) {
 
             return redirect()
@@ -137,7 +137,7 @@ class SupplierController extends Controller
 
             return redirect()
                 ->route('supplier.index')
-                ->with('success', 'Supplier updated successfully.');
+                ->with('success', 'Supplier PO updated successfully.');
         } catch (\Exception $e) {
 
             return redirect()
@@ -154,9 +154,9 @@ class SupplierController extends Controller
 
         if ($Supplier) {
             $Supplier->delete();
-            return redirect()->route('supplier.index')->with('success', 'Supplier deleted successfully.');
+            return redirect()->route('supplier.index')->with('success', 'Supplier PO deleted successfully.');
         }
 
-        return redirect()->back()->with('error', 'Supplier not found.');
+        return redirect()->back()->with('error', 'Supplier PO not found.');
     }
 }

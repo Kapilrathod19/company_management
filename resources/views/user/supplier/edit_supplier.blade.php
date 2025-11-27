@@ -50,7 +50,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Supplier Name</label>
                                         <select name="supplier_name" id="supplier_name" class="form-control">
-                                            <option value="">Select Supplier</option>
+                                            <option value="">Select Supplier Name</option>
                                             @foreach ($supplier_name as $party)
                                                 <option value="{{ $party->id }}"
                                                     {{ $supplier->supplier_name == $party->id ? 'selected' : '' }}>

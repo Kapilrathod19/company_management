@@ -49,7 +49,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="supplier_name" class="form-label">Supplier Name</label>
                                         <select name="supplier_name" id="supplier_name" class="form-control">
-                                            <option value="">Select Customer Name</option>
+                                            <option value="">Select Supplier Name</option>
                                             @foreach ($supplier_name as $party)
                                                 <option value="{{ $party->id }}"
                                                     {{ old('supplier_name') == $party->id ? 'selected' : '' }}>
@@ -69,7 +69,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="po_date" class="form-label">Po Date</label>
                                         <input type="date" name="po_date" id="po_date" class="form-control"
-                                            value="{{ old('po_date') }}">
+                                            value="{{ old('po_date', date('Y-m-d')) }}">
                                         <span class="text-danger"></span>
                                     </div>
 

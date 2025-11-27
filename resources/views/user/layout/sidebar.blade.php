@@ -73,7 +73,7 @@
                 <li class="@if (str_contains(Request::url(), '/supplier')) active @endif sidebar-layout">
                     <a href="{{ route('supplier.index') }}" class="svg-icon">
                         <i class="bi bi-truck"></i>
-                        <span class="ml-2">Supplier</span>
+                        <span class="ml-2">Supplier PO</span>
                     </a>
                 </li>
 

@@ -70,7 +70,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="po_date" class="form-label">Po Date</label>
                                         <input type="date" name="po_date" id="po_date" class="form-control"
-                                            value="{{ old('po_date') }}">
+                                            value="{{ old('po_date', date('Y-m-d')) }}">
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -138,7 +138,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="delivery_date" class="form-label">Delivery Date</label>
                                         <input type="date" name="delivery_date" id="delivery_date"
-                                            class="form-control" value="{{ old('delivery_date') }}">
+                                            class="form-control" value="{{ old('delivery_date', date('Y-m-d')) }}">
                                         <span class="text-danger"></span>
                                     </div>
 

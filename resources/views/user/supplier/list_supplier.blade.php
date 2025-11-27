@@ -12,7 +12,7 @@
                             </div>
                             <div class="header-action">
                                 <a class="btn btn-primary" href="{{ route('supplier.create') }}" role="button"><i
-                                        class="bi bi-plus"></i> Add Supplier</a>
+                                        class="bi bi-plus"></i> Add Supplier PO</a>
                             </div>
                         </div>
                     </div>
