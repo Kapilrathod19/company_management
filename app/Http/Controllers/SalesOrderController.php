@@ -34,15 +34,22 @@ class SalesOrderController extends Controller
             'qty'               => 'required|numeric',
             'weight'            => 'required|numeric|min:0',
             'total_weight'      => 'nullable|numeric|min:0',
+            'unit_no'           => 'required|string|max:255',
             'delivery_date'     => 'required|date',
+            'drawing_attachment' => 'required',
         ]);
 
 
         $drawing_attachment = null;
+        $rev_no = 0;
+
         if ($request->hasFile('drawing_attachment')) {
+
             $file = $request->file('drawing_attachment');
             $drawing_attachment = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('drawing_attachment'), $drawing_attachment);
+
+            $rev_no = 0;
         }
 
         $salesOrder = new SalesOrder();
@@ -60,7 +67,7 @@ class SalesOrderController extends Controller
         $salesOrder->total_weight = number_format($totalWeight, 2, '.', '');
 
         $salesOrder->unit_no          = $request->unit_no;
-        $salesOrder->rev_no           = $request->rev_no;
+        $salesOrder->rev_no           = $rev_no;
         $salesOrder->delivery_date    = $request->delivery_date;
         $salesOrder->drawing_attachment = $drawing_attachment;
         $salesOrder->save();
@@ -97,11 +104,14 @@ class SalesOrderController extends Controller
             'qty'               => 'required|numeric',
             'weight'            => 'required|numeric|min:0',
             'total_weight'      => 'nullable|numeric|min:0',
+            'unit_no'           => 'required|string|max:255',
             'delivery_date'     => 'required|date',
         ]);
 
-        if ($request->hasFile('drawing_attachment')) {
+        // Default: old rev no
+        $rev_no = $salesOrder->rev_no;
 
+        if ($request->hasFile('drawing_attachment')) {
             if (
                 $salesOrder->drawing_attachment &&
                 file_exists(public_path('drawing_attachment/' . $salesOrder->drawing_attachment))
@@ -112,8 +122,9 @@ class SalesOrderController extends Controller
             $file = $request->file('drawing_attachment');
             $fileName = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('drawing_attachment'), $fileName);
-
             $salesOrder->drawing_attachment = $fileName;
+
+            $rev_no = $rev_no + 1;
         }
 
         $salesOrder->customer_name   = $request->customer_name;
@@ -126,7 +137,7 @@ class SalesOrderController extends Controller
         $salesOrder->weight          = $request->weight;
         $salesOrder->total_weight = number_format(($request->qty * $request->weight), 2, '.', '');
         $salesOrder->unit_no        = $request->unit_no;
-        $salesOrder->rev_no         = $request->rev_no;
+        $salesOrder->rev_no         = $rev_no;
         $salesOrder->delivery_date   = $request->delivery_date;
 
         $salesOrder->save();
@@ -168,5 +179,4 @@ class SalesOrderController extends Controller
             'unit' => $item->unit
         ]);
     }
-
 }

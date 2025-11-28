@@ -129,13 +129,6 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="rev_no" class="form-label">Rev No</label>
-                                        <input type="text" name="rev_no" id="rev_no" class="form-control"
-                                            value="{{ old('rev_no') }}">
-                                        <span class="text-danger"></span>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
                                         <label for="delivery_date" class="form-label">Delivery Date</label>
                                         <input type="date" name="delivery_date" id="delivery_date"
                                             class="form-control" value="{{ old('delivery_date', date('Y-m-d')) }}">
@@ -148,6 +141,7 @@
                                             <input type="file" class="custom-file-input" id="drawing_attachment"
                                                 name="drawing_attachment">
                                             <label class="custom-file-label" for="drawing_attachment">Choose file</label>
+                                            <span class="text-danger"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -242,8 +236,16 @@
                     name: 'Weight'
                 },
                 {
+                    id: '#unit_no',
+                    name: 'Unit Number'
+                },
+                {
                     id: '#delivery_date',
                     name: 'Delivery Date'
+                },
+                {
+                    id: '#drawing_attachment',
+                    name: 'Drawing Attachment'
                 }
             ];
 

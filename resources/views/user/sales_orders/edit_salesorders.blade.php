@@ -127,13 +127,6 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="rev_no" class="form-label">Rev No</label>
-                                        <input type="text" name="rev_no" id="rev_no" class="form-control"
-                                            value="{{ $salesOrder->rev_no }}">
-                                        <span class="text-danger"></span>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Delivery Date</label>
                                         <input type="date" name="delivery_date" class="form-control"
                                             value="{{ $salesOrder->delivery_date }}">
@@ -247,6 +240,10 @@
                 {
                     id: '#weight',
                     name: 'Weight'
+                },
+                {
+                    id: '#unit_no',
+                    name: 'Unit Number'
                 },
                 {
                     id: '#delivery_date',
