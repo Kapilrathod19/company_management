@@ -10,7 +10,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
                             <div class="header-title">
-                                <h5 class="card-title">Edit Supplier</h5>
+                                <h5 class="card-title">Edit Supplier PO</h5>
                             </div>
                         </div>
 
@@ -86,19 +86,28 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Unit No</label>
+                                        <select name="unit_no" id="unit_no" class="form-control">
+                                            <option value="">Select Unit No</option>
+
+                                            {{-- Preselected current value --}}
+                                            @if ($supplier->unit_no)
+                                                <option value="{{ $supplier->unit_no }}" selected>
+                                                    {{ $supplier->sales_unit_number->unit_no }}
+                                                </option>
+                                            @endif
+                                        </select>
+                                        <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Sales PO No</label>
                                         <input type="text" name="sales_po_no" id="sales_po_no" class="form-control"
                                             value="{{ $supplier->sales_po_no }}">
-                                        <span class="text-danger"></span>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Unit No</label>
-                                        <input type="text" name="unit_no" id="unit_no" class="form-control"
-                                            value="{{ $supplier->unit_no }}">
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -164,18 +173,144 @@
 @endsection
 
 @section('scripts')
-    <script>
-        // Auto Total Weight Calculation
-        function calculateTotalWeight() {
-            let qty = parseFloat($('#qty').val()) || 0;
-            let weight = parseFloat($('#weight').val()) || 0;
-            $('#total_weight').val((qty * weight).toFixed(2));
+<script>
+    function calculateTotalWeight() {
+        let q = parseFloat($('#qty').val()) || 0;
+        let w = parseFloat($('#weight').val()) || 0;
+        $('#total_weight').val((q * w).toFixed(2));
+    }
+    $('#qty, #weight').on('input', calculateTotalWeight);
+
+
+    function resetFields() {
+        $('#sales_po_no').val('');
+        $('#part_no').val('');
+        $('#description').val('');
+        $('#qty').val('');
+        $('#weight').val('');
+        $('#total_weight').val('');
+    }
+
+    // ---------------------------------------------------------------------
+    // 🔥 1) LOAD UNIT NUMBERS AUTOMATICALLY ON EDIT PAGE LOAD
+    // ---------------------------------------------------------------------
+    $(document).ready(function () {
+
+        let selectedCustomer = $('#customer_name').val();
+        let selectedUnit = "{{ $supplier->unit_no }}";
+
+        if (selectedCustomer) {
+
+            let url = "{{ route('get.unit_no', ':customer') }}"
+                        .replace(':customer', selectedCustomer);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function (res) {
+                    $('#unit_no').empty().append('<option value="">Select Unit No</option>');
+
+                    res.forEach(function (row) {
+                        $('#unit_no').append(`
+                            <option value="${row.id}" ${row.id == selectedUnit ? 'selected' : ''}>
+                                ${row.unit_no}
+                            </option>
+                        `);
+                    });
+                }
+            });
+        }
+    });
+
+    // ---------------------------------------------------------------------
+    // 🔥 2) CUSTOMER NAME CHANGE → LOAD UNIT NUMBERS + RESET FIELDS
+    // ---------------------------------------------------------------------
+    $('#customer_name').on('change', function() {
+        let customer = $(this).val();
+
+        $('#unit_no').html('<option value="">Loading...</option>');
+        resetFields();
+
+        if (!customer) {
+            $('#unit_no').html('<option value="">Select Unit No</option>');
+            return;
         }
 
-        $('#qty, #weight').on('input', calculateTotalWeight);
+        let url = "{{ route('get.unit_no', ':customer') }}"
+                    .replace(':customer', customer);
 
-        // Validation
-        $(document).ready(function() {
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(res) {
+
+                $('#unit_no').empty().append('<option value="">Select Unit No</option>');
+
+                res.forEach(function(row) {
+                    $('#unit_no').append(
+                        `<option value="${row.id}">${row.unit_no}</option>`
+                    );
+                });
+            }
+        });
+    });
+
+    // ---------------------------------------------------------------------
+    // 🔥 3) UNIT NUMBER SELECTED → LOAD SALES ORDER DETAILS
+    // ---------------------------------------------------------------------
+    $('#unit_no').on('change', function() {
+        let id = $(this).val();
+
+        resetFields();
+
+        if (!id) return;
+
+        let url = "{{ route('get.salesorder.by.id', ':id') }}".replace(":id", id);
+
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(res) {
+                $('#sales_po_no').val(res.sales_po_no);
+                $('#part_no').val(res.part_no);
+                $('#description').val(res.description);
+                $('#qty').val(res.qty);
+                $('#weight').val(res.weight);
+                $('#total_weight').val(res.total_weight);
+            }
+        });
+    });
+
+    // ---------------------------------------------------------------------
+    // 🔥 4) PART NUMBER CHANGE (ONLY WHEN UNIT NOT SELECTED)
+    // ---------------------------------------------------------------------
+    $('#part_no').on('change', function() {
+        let partId = $(this).val();
+
+        if ($('#unit_no').val()) return;
+
+        if (!partId) {
+            resetFields();
+            return;
+        }
+
+        let url = "{{ route('get.item.by.id', ':id') }}".replace(":id", partId);
+
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(res) {
+                $('#description').val(res.description);
+                $('#qty').val(res.qty);
+                $('#weight').val(res.weight);
+
+                let total = (parseFloat(res.qty) || 0) * (parseFloat(res.weight) || 0);
+                $('#total_weight').val(total.toFixed(2));
+            }
+        });
+    });
+
+    $(document).ready(function() {
 
             const fields = [{
                     id: '#supplier_name',
@@ -192,14 +327,6 @@
                 {
                     id: '#customer_name',
                     name: 'Customer Name'
-                },
-                {
-                    id: '#sales_po_no',
-                    name: 'Sales PO Number'
-                },
-                {
-                    id: '#unit_no',
-                    name: 'Unit No'
                 },
                 {
                     id: '#part_no',
@@ -220,23 +347,13 @@
             ];
 
             function validateField(id, name) {
-                const field = $(id);
-                const value = field.val()?.trim();
-                let valid = true;
-                let msg = '';
-
-                if (!value) {
-                    valid = false;
-                    msg = `${name} is required.`;
-                }
+                let field = $(id);
+                let value = field.val()?.trim();
+                let valid = value ? true : false;
 
                 field.removeClass('is-valid is-invalid');
-
-                if (!valid) field.addClass('is-invalid');
-                else field.addClass('is-valid');
-
-                field.siblings('span.text-danger').text(msg);
-
+                field.addClass(valid ? 'is-valid' : 'is-invalid');
+                field.siblings('.text-danger').text(valid ? '' : `${name} is required.`);
                 return valid;
             }
 
@@ -247,15 +364,15 @@
             });
 
             $('#myform').on('submit', function(e) {
-                let allValid = true;
-
+                let good = true;
                 fields.forEach(f => {
-                    if (!validateField(f.id, f.name)) allValid = false;
+                    if (!validateField(f.id, f.name)) good = false;
                 });
-
-                if (!allValid) e.preventDefault();
+                if (!good) e.preventDefault();
             });
 
         });
-    </script>
+
+</script>
 @endsection
+

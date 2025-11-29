@@ -156,4 +156,9 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
         Route::get('/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
     });
+    Route::get('/get-unit-no/{customer}', [SupplierController::class, 'getUnitNo'])->name('get.unit_no');
+    Route::get('/get-salesorder-by-id/{id}', [SupplierController::class, 'getSalesOrderById'])
+    ->name('get.salesorder.by.id');
+    Route::get('/get-item-details/{id}', [SupplierController::class, 'getItemDetails'])->name('get.item.by.id');
+
 });

@@ -47,7 +47,7 @@
                                                 <td class="text-nowrap">{{ date('d-m-Y', strtotime($item->po_date)) }}</td>
                                                 <td>{{ $item->sales_order->name ?? '' }}</td>
                                                 <td>{{ $item->sales_po_no ?? '' }}</td>
-                                                <td>{{ $item->unit_no ?? '' }}</td>
+                                                <td>{{ $item->sales_unit_number->unit_no ?? '' }}</td>
                                                 <td>{{ $item->item->part_number ?? '' }}</td>
                                                 <td>{{ $item->description ?? '' }}</td>
                                                 <td>{{ $item->qty ?? '' }}</td>

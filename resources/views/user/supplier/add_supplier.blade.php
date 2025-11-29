@@ -9,7 +9,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
                             <div class="header-title">
-                                <h5 class="card-title">Add Supplier</h5>
+                                <h5 class="card-title">Add Supplier PO</h5>
                             </div>
                         </div>
                     </div>
@@ -87,16 +87,17 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="sales_po_no" class="form-label">Sales Po No</label>
-                                        <input type="text" name="sales_po_no" id="sales_po_no" class="form-control"
-                                            value="{{ old('sales_po_no') }}">
+                                        <label for="unit_no" class="form-label">Unit No</label>
+                                        <select name="unit_no" id="unit_no" class="form-control">
+                                            <option value="">Select Unit No</option>
+                                        </select>
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="unit_no" class="form-label">Unit No</label>
-                                        <input type="text" name="unit_no" id="unit_no" class="form-control"
-                                            value="{{ old('unit_no') }}">
+                                        <label for="sales_po_no" class="form-label">Sales Po No</label>
+                                        <input type="text" name="sales_po_no" id="sales_po_no" class="form-control"
+                                            value="{{ old('sales_po_no') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -194,14 +195,6 @@
                     name: 'Customer Name'
                 },
                 {
-                    id: '#sales_po_no',
-                    name: 'Sales PO Number'
-                },
-                {
-                    id: '#unit_no',
-                    name: 'Unit Number'
-                },
-                {
                     id: '#part_no',
                     name: 'Part Number'
                 },
@@ -263,6 +256,115 @@
                 }
             });
 
+        });
+
+        $('#customer_name').on('change', function() {
+            let customer = $(this).val();
+
+            if (!customer) {
+                $('#unit_no').html('<option value="">Select Unit No</option>');
+                $('#unit_no').val('').trigger('change');
+                resetFields();
+                return;
+            }
+
+            $("#unit_no").html('<option value="">Loading...</option>');
+
+            if (customer) {
+                let url = "{{ route('get.unit_no', ':customer') }}";
+                url = url.replace(':customer', customer);
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function(res) {
+                        $('#unit_no').empty().append('<option value="">Select Unit No</option>');
+                        res.forEach(function(row) {
+                            $('#unit_no').append(
+                                '<option value="' + row.id + '">' + row.unit_no +
+                                '</option>'
+                            );
+                        });
+                    }
+                });
+            } else {
+                $('#unit_no').html('<option value="">Select Unit No</option>');
+            }
+        });
+
+
+        // RESET ALL FIELDS FUNCTION
+        function resetFields() {
+            $('#sales_po_no').val('');
+            $('#part_no').val('');
+            $('#description').val('');
+            $('#qty').val('');
+            $('#weight').val('');
+            $('#total_weight').val('');
+        }
+
+        // When UNIT NO is changed
+        $('#unit_no').on('change', function() {
+            let id = $(this).val();
+
+            // If no Unit No selected → RESET
+            if (!id) {
+                resetFields();
+                return;
+            }
+
+            // Fetch SalesOrder by ID
+            let url = "{{ route('get.salesorder.by.id', ':id') }}".replace(':id', id);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function(res) {
+                    $('#sales_po_no').val(res.sales_po_no);
+                    $('#part_no').val(res.part_no).change();
+                    $('#description').val(res.description);
+                    $('#qty').val(res.qty);
+                    $('#weight').val(res.weight);
+                    $('#total_weight').val(res.total_weight);
+                }
+            });
+        });
+
+
+        // When PART NUMBER is changed
+        $('#part_no').on('change', function() {
+            let partId = $(this).val();
+
+            // If Unit No is selected → DO NOTHING (SalesOrder data already loaded)
+            if ($('#unit_no').val()) {
+                return;
+            }
+
+            // If Part Number cleared
+            if (!partId) {
+                $('#description').val('');
+                $('#qty').val('');
+                $('#weight').val('');
+                $('#total_weight').val('');
+                return;
+            }
+
+            // Fetch item details
+            let url = "{{ route('get.item.by.id', ':id') }}".replace(':id', partId);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function(res) {
+                    $('#description').val(res.description);
+                    $('#qty').val(res.qty);
+                    $('#weight').val(res.weight);
+
+                    // Calculate total weight
+                    let total = (parseFloat(res.qty) || 0) * (parseFloat(res.weight) || 0);
+                    $('#total_weight').val(total.toFixed(2));
+                }
+            });
         });
     </script>
 @endsection

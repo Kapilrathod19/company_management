@@ -12,7 +12,7 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::with('party', 'item', 'sales_order')->where('user_id', auth()->id())->latest()->get();
+        $suppliers = Supplier::with('party', 'item', 'sales_order', 'sales_unit_number')->where('user_id', auth()->id())->latest()->get();
         return view('user.supplier.list_supplier', compact('suppliers'));
     }
 
@@ -22,7 +22,7 @@ class SupplierController extends Controller
         $salesorders = SalesOrder::with('party')
             ->where('user_id', auth()->id())->get()->groupBy('customer_name')->map->first();
 
-        $items = Item::where('user_id', auth()->id())->where('category', 'Raw Material')->get();
+        $items = Item::where('user_id', auth()->id())->get();
 
         return view('user.supplier.add_supplier', compact('supplier_name', 'salesorders', 'items'));
     }
@@ -34,8 +34,6 @@ class SupplierController extends Controller
             'po_no'         => 'required|string|max:255',
             'po_date'       => 'required|date',
             'customer_name' => 'required|exists:parties,id',
-            'sales_po_no'   => 'required|string|max:255',
-            'unit_no'       => 'required|string|max:255',
             'part_no'       => 'required|exists:items,id',
             'description'   => 'required|string',
             'qty'           => 'required|numeric|min:1',
@@ -90,9 +88,7 @@ class SupplierController extends Controller
             ->groupBy('customer_name')
             ->map->first();
 
-        $items = Item::where('user_id', auth()->id())
-            ->where('category', 'Raw Material')
-            ->get();
+        $items = Item::where('user_id', auth()->id())->get();
 
         return view('user.supplier.edit_supplier', compact('supplier', 'supplier_name', 'salesorders', 'items'));
     }
@@ -104,8 +100,6 @@ class SupplierController extends Controller
             'po_no'         => 'required|string|max:255',
             'po_date'       => 'required|date',
             'customer_name' => 'required|exists:parties,id',
-            'sales_po_no'   => 'required|string|max:255',
-            'unit_no'       => 'required|string|max:255',
             'part_no'       => 'required|exists:items,id',
             'description'   => 'required|string',
             'qty'           => 'required|numeric|min:1',
@@ -158,5 +152,38 @@ class SupplierController extends Controller
         }
 
         return redirect()->back()->with('error', 'Supplier PO not found.');
+    }
+
+    public function getUnitNo($customer)
+    {
+        return SalesOrder::where('user_id', auth()->id())
+            ->where('customer_name', $customer)
+            ->select('id', 'unit_no')
+            ->get();
+    }
+
+    public function getSalesOrderById($id)
+    {
+        $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
+
+        return response()->json([
+            'sales_po_no'  => $salesOrder->po_no,
+            'part_no'      => $salesOrder->part_no,
+            'description'  => $salesOrder->description,
+            'qty'          => $salesOrder->qty,
+            'weight'       => $salesOrder->weight,
+            'total_weight' => $salesOrder->total_weight,
+        ]);
+    }
+
+    public function getItemDetails($id)
+    {
+        $item = Item::where('user_id', auth()->id())->findOrFail($id);
+
+        return response()->json([
+            'description' => $item->description,
+            'qty'         => $item->quantity,
+            'weight'      => $item->weight,
+        ]);
     }
 }

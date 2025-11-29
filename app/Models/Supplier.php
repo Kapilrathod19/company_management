@@ -39,5 +39,10 @@ class Supplier extends Model
     {
         return $this->belongsTo(Item::class, 'part_no');
     }
+    
+    public function sales_unit_number()
+    {
+        return $this->belongsTo(SalesOrder::class, 'unit_no');
+    }
 
 }
