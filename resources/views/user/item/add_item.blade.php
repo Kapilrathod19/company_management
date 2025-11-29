@@ -78,14 +78,14 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="quantity" class="form-label">Quantity</label>
-                                        <input type="text" name="quantity" class="form-control" id="quantity"
+                                        <input type="number" step="0.01" name="quantity" class="form-control" id="quantity"
                                             value="{{ old('quantity') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="weight" class="form-label">Weight</label>
-                                        <input type="text" name="weight" class="form-control" id="weight"
+                                        <input type="number" step="0.01" name="weight" class="form-control" id="weight"
                                             value="{{ old('weight') }}">
                                         <span class="text-danger"></span>
                                     </div>
