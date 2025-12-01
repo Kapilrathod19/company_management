@@ -20,6 +20,7 @@ class SalesOrder extends Model
         'qty',
         'weight',
         'total_weight',
+        'remain_qty',
         'unit_no',
         'rev_no',
         'delivery_date',

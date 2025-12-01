@@ -22,6 +22,7 @@ class Supplier extends Model
         'qty',
         'weight',
         'total_weight',
+        'remain_qty',
         'remark',
     ];
 

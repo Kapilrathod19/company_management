@@ -59,6 +59,7 @@ class SupplierController extends Controller
                 'description'   => $request->description,
                 'qty'           => $request->qty,
                 'weight'        => $request->weight,
+                'remain_qty'    => $request->qty,
                 'total_weight'  => $totalWeight,
                 'remark'        => $request->remark,
             ]);
@@ -110,8 +111,19 @@ class SupplierController extends Controller
 
             $supplier = Supplier::where('user_id', auth()->id())->findOrFail($id);
 
-            $totalWeight = (float)$request->qty * (float)$request->weight;
-            $totalWeight = number_format($totalWeight, 2, '.', '');
+            $oldQty = $supplier->qty;
+            $newQty = $request->qty;
+
+            $qtyDiff = $newQty - $oldQty;
+
+            $newRemainQty = $supplier->remain_qty + $qtyDiff;
+
+            if ($newRemainQty < 0) {
+                return back()->with('error', 'Remain quantity cannot be negative.')->withInput();
+            }
+
+            $newWeight = $request->weight;
+            $totalWeight = number_format($newQty * $newWeight, 2, '.', '');
 
             $supplier->update([
                 'supplier_name' => $request->supplier_name,
@@ -122,9 +134,10 @@ class SupplierController extends Controller
                 'unit_no'       => $request->unit_no,
                 'part_no'       => $request->part_no,
                 'description'   => $request->description,
-                'qty'           => $request->qty,
-                'weight'        => $request->weight,
+                'qty'           => $newQty,
+                'weight'        => $newWeight,
                 'total_weight'  => $totalWeight,
+                'remain_qty'    => $newRemainQty,
                 'remark'        => $request->remark,
             ]);
 
@@ -139,6 +152,7 @@ class SupplierController extends Controller
                 ->withInput();
         }
     }
+
 
 
     public function destroy($id)

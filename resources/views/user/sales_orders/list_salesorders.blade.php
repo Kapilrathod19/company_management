@@ -32,6 +32,7 @@
                                             <th>Qty</th>
                                             <th>Weight</th>
                                             <th>Total Weight</th>
+                                            <th>Remaining Qty</th>
                                             <th>Unit No</th>
                                             <th>Rev No</th>
                                             <th>Delivery Date</th>
@@ -52,6 +53,7 @@
                                                 <td>{{ $item->qty ?? '' }}</td>
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>{{ $item->total_weight ?? '' }}</td>
+                                                <td>{{ $item->remain_qty ?? '' }}</td>
                                                 <td>{{ $item->unit_no ?? '' }}</td>
                                                 <td>{{ $item->rev_no ?? '' }}</td>
                                                 <td class="text-nowrap">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grn;
+use App\Models\Item;
 use App\Models\Party;
 use App\Models\SalesOrder;
 use App\Models\Supplier;
@@ -61,8 +62,47 @@ class GrnController extends Controller
             $grn->weight             = $request->weight;
             $grn->total_weight       = $request->total_weight;
             $grn->remark             = $request->remark;
-
             $grn->save();
+
+            $item = Item::where('user_id', auth()->id())
+                ->where('part_number', $request->part_no)
+                ->first();
+
+            if ($item) {
+                $item->quantity += $request->qty;
+                $item->weight   += $request->weight;
+                $item->save();
+            }
+
+            if ($request->category == "Customer") {
+
+                $salesOrder = SalesOrder::where('user_id', auth()->id())
+                    ->where('customer_name', $request->party_name)
+                    ->where('po_no', $request->po_no)
+                    ->first();
+
+                if ($salesOrder) {
+
+                    $salesOrder->remain_qty = $salesOrder->remain_qty - $request->qty;
+                    $salesOrder->save();
+                }
+            }
+
+            if ($request->category == "Supplier" || $request->category == "Jobwork") {
+
+                $Supplier = Supplier::where('user_id', auth()->id())
+                    ->where('supplier_name', $request->party_name)
+                    ->where('po_no', $request->po_no)
+                    ->first();
+
+                if ($Supplier) {
+
+                    $Supplier->remain_qty = $Supplier->remain_qty - $request->qty;
+
+                    $Supplier->save();
+                }
+            }
+
 
             return redirect()->route('grn.index')->with('success', 'GRN added successfully.');
         } catch (\Exception $e) {
@@ -81,7 +121,7 @@ class GrnController extends Controller
 
     public function update(Request $request, $id)
     {
-        $grn = Grn::where('user_id', auth()->id())->findOrFail($id);
+        $grn = GRN::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
             'grn_date'            => 'required|date',
@@ -100,6 +140,50 @@ class GrnController extends Controller
         ]);
 
         try {
+
+            $oldQty    = $grn->qty;
+
+            $newQty    = $request->qty;
+
+            $qtyDiff    = $newQty - $oldQty;
+
+            $item = Item::where('user_id', auth()->id())
+                ->where('part_number', $grn->part_no)
+                ->first();
+
+            if ($item) {
+                $item->quantity += $qtyDiff;
+                $item->save();
+            }
+
+            if ($grn->category == "Customer") {
+
+                $salesOrder = SalesOrder::where('user_id', auth()->id())
+                    ->where('customer_name', $grn->party_name)
+                    ->where('po_no', $grn->po_no)
+                    ->first();
+
+                if ($salesOrder) {
+
+                    $salesOrder->remain_qty    -= $qtyDiff;
+                    $salesOrder->save();
+                }
+            }
+
+            if ($grn->category == "Supplier" || $grn->category == "Jobwork") {
+
+                $supplier = Supplier::where('user_id', auth()->id())
+                    ->where('supplier_name', $grn->party_name)
+                    ->where('po_no', $grn->po_no)
+                    ->first();
+
+                if ($supplier) {
+
+                    $supplier->remain_qty    -= $qtyDiff;
+                    $supplier->save();
+                }
+            }
+
             $grn->grn_date           = $request->grn_date;
             $grn->category           = $request->category;
             $grn->party_name         = $request->party_name;
@@ -109,7 +193,7 @@ class GrnController extends Controller
             $grn->unit_no            = $request->unit_no;
             $grn->part_no            = $request->part_no;
             $grn->description        = $request->description;
-            $grn->qty                = $request->qty;
+            $grn->qty                = $newQty;
             $grn->weight             = $request->weight;
             $grn->total_weight       = $request->total_weight;
             $grn->remark             = $request->remark;
@@ -118,10 +202,12 @@ class GrnController extends Controller
 
             return redirect()->route('grn.index')->with('success', 'GRN updated successfully.');
         } catch (\Exception $e) {
+
             return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())
                 ->withInput();
         }
     }
+
 
     public function destroy($id)
     {
@@ -143,7 +229,7 @@ class GrnController extends Controller
 
         if ($category == "Customer") {
 
-            $partyIds = SalesOrder::where('user_id', $userId)->pluck('customer_name')->unique()->toArray();
+            $partyIds = SalesOrder::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('customer_name')->unique()->toArray();
 
             $parties = Party::whereIn('id', $partyIds)->get();
 
@@ -154,7 +240,7 @@ class GrnController extends Controller
 
             $supplierParties = Party::where('user_id', $userId)->where('category', 'Supplier')->pluck('id')->toArray();
 
-            $supplierTablePartyIds = Supplier::where('user_id', $userId)->pluck('supplier_name')->unique()->toArray();
+            $supplierTablePartyIds = Supplier::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('supplier_name')->unique()->toArray();
 
             $finalIds = array_intersect($supplierParties, $supplierTablePartyIds);
 
@@ -167,7 +253,7 @@ class GrnController extends Controller
 
             $jobworkParties = Party::where('user_id', $userId)->where('category', 'Jobwork')->pluck('id')->toArray();
 
-            $supplierTablePartyIds = Supplier::where('user_id', $userId)->pluck('supplier_name')->unique()->toArray();
+            $supplierTablePartyIds = Supplier::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('supplier_name')->unique()->toArray();
 
             $finalIds = array_intersect($jobworkParties, $supplierTablePartyIds);
 
@@ -236,9 +322,9 @@ class GrnController extends Controller
                     'unit_no'      => $order->unit_no,
                     'part_no'      => $order->item->part_number ?? '',
                     'description'  => $order->description,
-                    'qty'          => $order->qty,
+                    'qty'          => $order->remain_qty,
                     'weight'       => $order->weight,
-                    'total_weight' => $order->total_weight,
+                    'total_weight' => $order->remain_qty * $order->weight,
                 ]
             ]);
         }
@@ -257,9 +343,9 @@ class GrnController extends Controller
                     'unit_no'      => $supplier->sales_unit_number->unit_no ?? '',
                     'part_no'      => $supplier->item->part_number ?? '',
                     'description'  => $supplier->description,
-                    'qty'          => $supplier->qty,
+                    'qty'          => $supplier->remain_qty,
                     'weight'       => $supplier->weight,
-                    'total_weight' => $supplier->total_weight,
+                    'total_weight' => $supplier->remain_qty * $supplier->weight,
                 ]
             ]);
         }

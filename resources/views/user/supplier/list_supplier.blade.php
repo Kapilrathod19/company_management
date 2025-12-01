@@ -34,6 +34,7 @@
                                             <th>Qty</th>
                                             <th>Weight</th>
                                             <th>Total Weight</th>
+                                            <th>Remaining Qty</th>
                                             <th>Remark</th>
                                             <th>Action</th>
                                         </tr>
@@ -53,6 +54,7 @@
                                                 <td>{{ $item->qty ?? '' }}</td>
                                                 <td>{{ $item->weight ?? '' }}</td>
                                                 <td>{{ $item->total_weight ?? '' }}</td>
+                                                <td>{{ $item->remain_qty ?? '' }}</td>
                                                 <td>{{ $item->remark ?? '' }}</td>
                                                 <td>
                                                     <a class="btn btn-primary btn-sm mb-2"

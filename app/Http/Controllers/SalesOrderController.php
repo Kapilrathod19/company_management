@@ -66,6 +66,7 @@ class SalesOrderController extends Controller
         $totalWeight = (float)$request->qty * (float)$request->weight;
         $salesOrder->total_weight = number_format($totalWeight, 2, '.', '');
 
+        $salesOrder->remain_qty       = $request->qty;
         $salesOrder->unit_no          = $request->unit_no;
         $salesOrder->rev_no           = $rev_no;
         $salesOrder->delivery_date    = $request->delivery_date;
@@ -95,23 +96,32 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
-            'customer_name'     => 'required|exists:parties,id',
-            'po_no'             => 'required|string|max:255',
-            'po_date'           => 'required|date',
-            'part_no'           => 'required|exists:items,id',
-            'description'       => 'required|string',
-            'unit'              => 'required|string|max:50',
-            'qty'               => 'required|numeric',
-            'weight'            => 'required|numeric|min:0',
-            'total_weight'      => 'nullable|numeric|min:0',
-            'unit_no'           => 'required|string|max:255',
-            'delivery_date'     => 'required|date',
+            'customer_name' => 'required|exists:parties,id',
+            'po_no'         => 'required|string|max:255',
+            'po_date'       => 'required|date',
+            'part_no'       => 'required|exists:items,id',
+            'description'   => 'required|string',
+            'unit'          => 'required|string|max:50',
+            'qty'           => 'required|numeric|min:1',
+            'weight'        => 'required|numeric|min:0',
+            'unit_no'       => 'required|string|max:255',
+            'delivery_date' => 'required|date',
         ]);
 
-        // Default: old rev no
+        $oldQty = $salesOrder->qty;
+        $newQty = $request->qty;
+        $qtyDiff = $newQty - $oldQty;
+
+        $newRemainQty = $salesOrder->remain_qty + $qtyDiff;
+
+        if ($newRemainQty < 0) {
+            return back()->with('error', 'Remain quantity cannot be negative.')->withInput();
+        }
+
         $rev_no = $salesOrder->rev_no;
 
         if ($request->hasFile('drawing_attachment')) {
+
             if (
                 $salesOrder->drawing_attachment &&
                 file_exists(public_path('drawing_attachment/' . $salesOrder->drawing_attachment))
@@ -122,23 +132,24 @@ class SalesOrderController extends Controller
             $file = $request->file('drawing_attachment');
             $fileName = time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('drawing_attachment'), $fileName);
-            $salesOrder->drawing_attachment = $fileName;
 
-            $rev_no = $rev_no + 1;
+            $salesOrder->drawing_attachment = $fileName;
+            $rev_no++;
         }
 
-        $salesOrder->customer_name   = $request->customer_name;
-        $salesOrder->po_no           = $request->po_no;
-        $salesOrder->po_date         = $request->po_date;
-        $salesOrder->part_no         = $request->part_no;
-        $salesOrder->description     = $request->description;
-        $salesOrder->unit            = $request->unit;
-        $salesOrder->qty             = $request->qty;
-        $salesOrder->weight          = $request->weight;
-        $salesOrder->total_weight = number_format(($request->qty * $request->weight), 2, '.', '');
-        $salesOrder->unit_no        = $request->unit_no;
-        $salesOrder->rev_no         = $rev_no;
-        $salesOrder->delivery_date   = $request->delivery_date;
+        $salesOrder->customer_name = $request->customer_name;
+        $salesOrder->po_no         = $request->po_no;
+        $salesOrder->po_date       = $request->po_date;
+        $salesOrder->part_no       = $request->part_no;
+        $salesOrder->description   = $request->description;
+        $salesOrder->unit          = $request->unit;
+        $salesOrder->qty           = $newQty;
+        $salesOrder->weight        = $request->weight;
+        $salesOrder->total_weight  = number_format(($newQty * $request->weight), 2, '.', '');
+        $salesOrder->unit_no       = $request->unit_no;
+        $salesOrder->remain_qty    = $newRemainQty;
+        $salesOrder->rev_no        = $rev_no;
+        $salesOrder->delivery_date = $request->delivery_date;
 
         $salesOrder->save();
 
