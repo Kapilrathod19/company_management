@@ -325,10 +325,6 @@
                     name: 'PO Date'
                 },
                 {
-                    id: '#customer_name',
-                    name: 'Customer Name'
-                },
-                {
                     id: '#part_no',
                     name: 'Part Number'
                 },
