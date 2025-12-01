@@ -18,7 +18,8 @@ class SupplierController extends Controller
 
     public function create()
     {
-        $supplier_name = Party::where('user_id', auth()->id())->where('category', 'Supplier')->get();
+        $supplier_name = Party::where('user_id', auth()->id())->whereIn('category', ['Supplier', 'Jobwork'])->get();
+
         $salesorders = SalesOrder::with('party')
             ->where('user_id', auth()->id())->get()->groupBy('customer_name')->map->first();
 
@@ -78,9 +79,7 @@ class SupplierController extends Controller
     {
         $supplier = Supplier::where('user_id', auth()->id())->findOrFail($id);
 
-        $supplier_name = Party::where('user_id', auth()->id())
-            ->where('category', 'Supplier')
-            ->get();
+        $supplier_name = Party::where('user_id', auth()->id())->whereIn('category', ['Supplier', 'Jobwork'])->get();
 
         $salesorders = SalesOrder::with('party')
             ->where('user_id', auth()->id())

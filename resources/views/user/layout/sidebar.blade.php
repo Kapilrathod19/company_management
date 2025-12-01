@@ -76,6 +76,12 @@
                         <span class="ml-2">Supplier PO</span>
                     </a>
                 </li>
+                <li class="@if (str_contains(Request::url(), '/grn')) active @endif sidebar-layout">
+                    <a href="{{ route('grn.index') }}" class="svg-icon">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <span class="ml-2">GRN</span>
+                    </a>
+                </li>
 
             </ul>
         </nav>
