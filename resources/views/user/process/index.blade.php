@@ -17,16 +17,24 @@
             </div>
 
             <div style="width: 20%">
+                @php
+                    $permissions = App\Models\Permission::where('user_id', auth()->id())
+                        ->get()
+                        ->keyBy('module');
 
-                <a href="javascript:void(0);" onclick="openEditProcess({{ $item->id }}, {{ $p->id }})"
-                    class="btn btn-sm btn-info">
-                    <i class="bi bi-pencil-square"></i>
-                </a>
-
-                <button type="button" class="btn btn-sm btn-danger delete-confirm"
-                    data-url="{{ route('process.delete', [$item->id, $p->id]) }}">
-                    <i class="bi bi-trash-fill"></i>
-                </button>
+                @endphp
+                @if (isset($permissions['item_process']) && $permissions['item_process']->edit == 1)
+                    <a href="javascript:void(0);" onclick="openEditProcess({{ $item->id }}, {{ $p->id }})"
+                        class="btn btn-sm btn-info">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                @endif
+                @if (isset($permissions['item_process']) && $permissions['item_process']->delete == 1)
+                    <button type="button" class="btn btn-sm btn-danger delete-confirm"
+                        data-url="{{ route('process.delete', [$item->id, $p->id]) }}">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                @endif
             </div>
 
         </li>
@@ -139,7 +147,7 @@
             });
         });
     });
-    
+
     $("#sortable").sortable({
         placeholder: "ui-state-highlight",
         update: function(event, ui) {

@@ -14,8 +14,8 @@ class ProcessController extends Controller
     {
         $items = Item::where('user_id', auth()->id())->latest()->get();
         $ProcessMaster = ProcessMaster::where('user_id', auth()->id())->get();
-
-        return view('user.process.items', compact('items', 'ProcessMaster'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.process.items', compact('items', 'ProcessMaster','permissions'));
     }
 
     public function index(Request $request, $itemId)

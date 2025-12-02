@@ -34,18 +34,22 @@
                                                 <td>{{ $item->part_number ?? '' }}</td>
                                                 <td>{{ $item->description ?? '' }}</td>
                                                 <td>
-                                                    <a href="javascript:void(0);"
-                                                        onclick="openProcessList({{ $item->id }}, '{{ $item->part_number }}')"
-                                                        class="btn btn-primary btn-sm mb-2" title="View Processes" data-toggle="tooltip" data-placement="top">
-                                                        <i class="bi bi-diagram-3"></i>
-                                                    </a>
-                                                    
-                                                    <a href="javascript:void(0)"
-                                                        onclick="openProcessModal({{ $item->id }}, '{{ $item->part_number }}')"
-                                                        class="btn btn-success btn-sm mb-2" title="Add Process"
-                                                        data-toggle="tooltip" data-placement="top">
-                                                        <i class="bi bi-plus"></i>
-                                                    </a>
+                                                    @if (isset($permissions['item_process']) && $permissions['item_process']->view == 1)
+                                                        <a href="javascript:void(0);"
+                                                            onclick="openProcessList({{ $item->id }}, '{{ $item->part_number }}')"
+                                                            class="btn btn-primary btn-sm mb-2" title="View Processes"
+                                                            data-toggle="tooltip" data-placement="top">
+                                                            <i class="bi bi-diagram-3"></i>
+                                                        </a>
+                                                    @endif
+                                                    @if (isset($permissions['item_process']) && $permissions['item_process']->add == 1)
+                                                        <a href="javascript:void(0)"
+                                                            onclick="openProcessModal({{ $item->id }}, '{{ $item->part_number }}')"
+                                                            class="btn btn-success btn-sm mb-2" title="Add Process"
+                                                            data-toggle="tooltip" data-placement="top">
+                                                            <i class="bi bi-plus"></i>
+                                                        </a>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
