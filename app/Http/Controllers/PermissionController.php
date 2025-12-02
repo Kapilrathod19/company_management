@@ -34,21 +34,25 @@ class PermissionController extends Controller
 
     public function store(Request $request, $userId)
     {
-        if (!$request->has('permissions')) {
-            Permission::where('user_id', $userId)->delete();
-            return back()->with('success', 'All permissions removed successfully');
-        }
+        foreach ($this->modules as $module) {
+            $permData = $request->permissions[$module] ?? null;
 
-        foreach ($request->permissions as $module => $permData) {
-            Permission::updateOrCreate(
-                ['user_id' => $userId, 'module' => $module],
-                [
-                    'view'   => isset($permData['view']) ? 1 : 0,
-                    'add'    => isset($permData['add']) ? 1 : 0,
-                    'edit'   => isset($permData['edit']) ? 1 : 0,
-                    'delete' => isset($permData['delete']) ? 1 : 0,
-                ]
-            );
+            $hasPermission = $permData &&
+                (isset($permData['view']) || isset($permData['add']) || isset($permData['edit']) || isset($permData['delete']));
+
+            if ($hasPermission) {
+                Permission::updateOrCreate(
+                    ['user_id' => $userId, 'module' => $module],
+                    [
+                        'view'   => isset($permData['view']) ? 1 : 0,
+                        'add'    => isset($permData['add']) ? 1 : 0,
+                        'edit'   => isset($permData['edit']) ? 1 : 0,
+                        'delete' => isset($permData['delete']) ? 1 : 0,
+                    ]
+                );
+            } else {
+                Permission::where('user_id', $userId)->where('module', $module)->delete();
+            }
         }
 
         return back()->with('success', 'Permissions updated successfully');
