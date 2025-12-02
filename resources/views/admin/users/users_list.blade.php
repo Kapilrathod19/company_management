@@ -50,6 +50,11 @@
                                                         role="button">
                                                         <i class="bi bi-trash-fill"></i>
                                                     </a>
+                                                    <a href="{{ route('admin.user.permissions', $item->id) }}"
+                                                        class="btn btn-warning btn-sm mb-2" title="Manage Permissions"
+                                                        data-toggle="tooltip" data-placement="top">
+                                                        <i class="bi bi-shield-lock"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endforeach

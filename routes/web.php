@@ -11,6 +11,7 @@ use App\Http\Controllers\GrnController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PartyController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
@@ -66,6 +67,9 @@ Route::middleware(['auth', 'checkRole:admin'])->group(function () {
             Route::put('/update/{id}', [AdminUsersController::class, 'update_user'])->name('admin.update_user');
             Route::get('/destroy/{id}', [AdminUsersController::class, 'destroy_user'])->name('admin.destroy_user');
         });
+
+        Route::get('/user-permissions/{id}', [PermissionController::class, 'index'])->name('admin.user.permissions');
+        Route::post('/user-permissions/{id}', [PermissionController::class, 'store'])->name('admin.user.permissions.store');
     });
 });
 
@@ -80,12 +84,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
 
     Route::prefix('party')->group(function () {
-        Route::get('/', [PartyController::class, 'index'])->name('party.index');
-        Route::get('create', [PartyController::class, 'create'])->name('party.create');
-        Route::post('/store', [PartyController::class, 'store'])->name('party.store');
-        Route::get('/edit/{id}', [PartyController::class, 'edit'])->name('party.edit');
-        Route::put('/update/{id}', [PartyController::class, 'update'])->name('party.update');
-        Route::get('/destroy/{id}', [PartyController::class, 'destroy'])->name('party.destroy');
+        Route::get('/', [PartyController::class, 'index'])->name('party.index')->middleware('permission:party_master,view');
+        Route::get('create', [PartyController::class, 'create'])->name('party.create')->middleware('permission:party_master,add');
+        Route::post('/store', [PartyController::class, 'store'])->name('party.store')->middleware('permission:party_master,add');
+        Route::get('/edit/{id}', [PartyController::class, 'edit'])->name('party.edit')->middleware('permission:party_master,edit');
+        Route::put('/update/{id}', [PartyController::class, 'update'])->name('party.update')->middleware('permission:party_master,edit');
+        Route::get('/destroy/{id}', [PartyController::class, 'destroy'])->name('party.destroy')->middleware('permission:party_master,delete');
     });
 
     Route::prefix('item')->group(function () {
@@ -170,10 +174,10 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [GrnController::class, 'update'])->name('grn.update');
         Route::get('/destroy/{id}', [GrnController::class, 'destroy'])->name('grn.destroy');
     });
-    Route::get('/get-parties', [GRNController::class, 'getParties'])->name('get.parties.by.category');
-    Route::get('/get-po', [GRNController::class, 'getPoNumbers'])->name('get.po.by.party');
-    Route::get('/grn/get-po-details', [GRNController::class, 'getPoDetails'])->name('grn.getPoDetails');
-    Route::get('/grn/get-po-items', [GRNController::class, 'getPoItems'])->name('grn.getPoItems');
-    Route::get('/grn/get-item-by-unit', [GRNController::class, 'getItemByUnit'])->name('grn.getItemByUnit');
-    Route::get('/grn/get-item-by-part', [GRNController::class, 'getItemByPart'])->name('grn.getItemByPart');
+    Route::get('/get-parties', [GrnController::class, 'getParties'])->name('get.parties.by.category');
+    Route::get('/get-po', [GrnController::class, 'getPoNumbers'])->name('get.po.by.party');
+    Route::get('/grn/get-po-details', [GrnController::class, 'getPoDetails'])->name('grn.getPoDetails');
+    Route::get('/grn/get-po-items', [GrnController::class, 'getPoItems'])->name('grn.getPoItems');
+    Route::get('/grn/get-item-by-unit', [GrnController::class, 'getItemByUnit'])->name('grn.getItemByUnit');
+    Route::get('/grn/get-item-by-part', [GrnController::class, 'getItemByPart'])->name('grn.getItemByPart');
 });

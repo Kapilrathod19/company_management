@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Party;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
 class PartyController extends Controller
@@ -11,7 +12,8 @@ class PartyController extends Controller
     public function index()
     {
         $parties = Party::where('user_id', auth()->id())->latest()->get();
-        return view('user.party.list_party', compact('parties'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.party.list_party', compact('parties', 'permissions'));
     }
 
 

@@ -11,8 +11,10 @@
                                 <h5 class="card-title">Party List</h5>
                             </div>
                             <div class="header-action">
-                                <a class="btn btn-primary" href="{{ route('party.create') }}" role="button"><i
-                                        class="bi bi-plus"></i> Add Party</a>
+                                @if (isset($permissions['party_master']) && $permissions['party_master']->add == 1)
+                                    <a class="btn btn-primary" href="{{ route('party.create') }}" role="button"><i
+                                            class="bi bi-plus"></i> Add Party</a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -43,15 +45,19 @@
                                                 <td>{{ $item->gst_number ?? '' }}</td>
                                                 <td>{{ $item->address ?? '' }}</td>
                                                 <td>
-                                                    <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('party.edit', $item->id) }}" role="button">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </a>
-                                                    <a class="btn btn-danger btn-sm delete-confirm mb-2"
-                                                        href="javascript:void(0)" data-id="{{ $item->id }}"
-                                                        role="button">
-                                                        <i class="bi bi-trash-fill"></i>
-                                                    </a>
+                                                    @if (isset($permissions['party_master']) && $permissions['party_master']->edit == 1)
+                                                        <a class="btn btn-primary btn-sm mb-2"
+                                                            href="{{ route('party.edit', $item->id) }}" role="button">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </a>
+                                                    @endif
+                                                    @if (isset($permissions['party_master']) && $permissions['party_master']->delete == 1)
+                                                        <a class="btn btn-danger btn-sm delete-confirm mb-2"
+                                                            href="javascript:void(0)" data-id="{{ $item->id }}"
+                                                            role="button">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </a>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
