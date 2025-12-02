@@ -8,7 +8,7 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
                             <div class="header-title">
-                                <h5 class="card-title">Supplier List</h5>
+                                <h5 class="card-title">Supplier PO List</h5>
                             </div>
                             <div class="header-action">
                                 <a class="btn btn-primary" href="{{ route('supplier.create') }}" role="button"><i
