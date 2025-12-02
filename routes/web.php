@@ -117,12 +117,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/process/get/{id}', [ProcessController::class, 'getProcesses'])->name('process.get');
 
     Route::prefix('process_master')->group(function () {
-        Route::get('/', [ProcessController::class, 'process_master_index'])->name('process_master.index');
-        Route::get('create', [ProcessController::class, 'process_master_create'])->name('process_master.create');
-        Route::post('/store', [ProcessController::class, 'process_master_store'])->name('process_master.store');
-        Route::get('/edit/{id}', [ProcessController::class, 'process_master_edit'])->name('process_master.edit');
-        Route::put('/update/{id}', [ProcessController::class, 'process_master_update'])->name('process_master.update');
-        Route::get('/destroy/{id}', [ProcessController::class, 'process_master_destroy'])->name('process_master.destroy');
+        Route::get('/', [ProcessController::class, 'process_master_index'])->name('process_master.index')->middleware('permission:process_master,view');
+        Route::get('create', [ProcessController::class, 'process_master_create'])->name('process_master.create')->middleware('permission:process_master,add');
+        Route::post('/store', [ProcessController::class, 'process_master_store'])->name('process_master.store')->middleware('permission:process_master,add');
+        Route::get('/edit/{id}', [ProcessController::class, 'process_master_edit'])->name('process_master.edit')->middleware('permission:process_master,edit');
+        Route::put('/update/{id}', [ProcessController::class, 'process_master_update'])->name('process_master.update')->middleware('permission:process_master,edit');
+        Route::get('/destroy/{id}', [ProcessController::class, 'process_master_destroy'])->name('process_master.destroy')->middleware('permission:process_master,delete');
     });
 
     Route::prefix('employee')->group(function () {

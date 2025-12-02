@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Permission;
 use App\Models\Process;
 use App\Models\ProcessMaster;
 use Illuminate\Http\Request;
@@ -110,7 +111,8 @@ class ProcessController extends Controller
     public function process_master_index()
     {
         $processMasters = ProcessMaster::where('user_id', auth()->id())->latest()->get();
-        return view('user.process_master.index', compact('processMasters'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.process_master.index', compact('processMasters', 'permissions'));
     }
 
     public function process_master_create()
