@@ -301,7 +301,7 @@ class GrnController extends Controller
         return response()->json(['status' => false, 'data' => []]);
     }
 
-    public function getPoDetails(Request $request)
+    public function getPoItems(Request $request)
     {
         $category = $request->category;
         $partyId  = $request->party_id;
@@ -310,17 +310,55 @@ class GrnController extends Controller
 
         if ($category == "Customer") {
 
-            $order = SalesOrder::where('user_id', $userId)->where('customer_name', $partyId)->where('po_no', $poNo)->first();
+            $orders = SalesOrder::where('user_id', $userId)
+                ->where('customer_name', $partyId)
+                ->where('po_no', $poNo)
+                ->get();
 
-            if (!$order) {
-                return response()->json(['status' => false, 'message' => 'PO Not Found']);
-            }
+            return response()->json([
+                'status' => true,
+                'unit_numbers' => $orders->pluck('unit_no')->unique()->values(),
+                'part_numbers' => $orders->pluck('item.part_number')->unique()->values(),
+            ]);
+        }
+
+        if ($category == "Supplier" || $category == "Jobwork") {
+
+            $suppliers = Supplier::with('sales_unit_number', 'item')
+                ->where('user_id', $userId)
+                ->where('supplier_name', $partyId)
+                ->where('po_no', $poNo)
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'unit_numbers' => $suppliers->pluck('sales_unit_number.unit_no')->unique()->values(),
+                'part_numbers' => $suppliers->pluck('item.part_number')->unique()->values(),
+            ]);
+        }
+    }
+
+    public function getItemByUnit(Request $request)
+    {
+        $unitNo = $request->unit_no;
+        $category = $request->category;
+        $partyId = $request->party_id;
+        $poNo = $request->po_no;
+
+        if ($category == "Customer") {
+
+            $order = SalesOrder::where('user_id', auth()->id())
+                ->where('customer_name', $partyId)
+                ->where('po_no', $poNo)
+                ->where('unit_no', $unitNo)
+                ->first();
+
+            if (!$order) return response()->json(['status' => false]);
 
             return response()->json([
                 'status' => true,
                 'data' => [
-                    'unit_no'      => $order->unit_no,
-                    'part_no'      => $order->item->part_number ?? '',
+                    'part_no'      => $order->item->part_number,
                     'description'  => $order->description,
                     'qty'          => $order->remain_qty,
                     'weight'       => $order->weight,
@@ -331,17 +369,21 @@ class GrnController extends Controller
 
         if ($category == "Supplier" || $category == "Jobwork") {
 
-            $supplier = Supplier::with('sales_unit_number', 'item')->where('user_id', $userId)->where('supplier_name', $partyId)->where('po_no', $poNo)->first();
+            $supplier = Supplier::with('item', 'sales_unit_number')
+                ->where('user_id', auth()->id())
+                ->where('supplier_name', $partyId)
+                ->where('po_no', $poNo)
+                ->whereHas('sales_unit_number', function ($q) use ($unitNo) {
+                    $q->where('unit_no', $unitNo);
+                })
+                ->first();
 
-            if (!$supplier) {
-                return response()->json(['status' => false, 'message' => 'PO Not Found']);
-            }
+            if (!$supplier) return response()->json(['status' => false]);
 
             return response()->json([
                 'status' => true,
                 'data' => [
-                    'unit_no'      => $supplier->sales_unit_number->unit_no ?? '',
-                    'part_no'      => $supplier->item->part_number ?? '',
+                    'part_no'      => $supplier->item->part_number,
                     'description'  => $supplier->description,
                     'qty'          => $supplier->remain_qty,
                     'weight'       => $supplier->weight,
@@ -349,7 +391,62 @@ class GrnController extends Controller
                 ]
             ]);
         }
+    }
 
-        return response()->json(['status' => false, 'message' => 'Invalid Category']);
+    public function getItemByPart(Request $request)
+    {
+        $partNo = $request->part_no;
+        $category = $request->category;
+        $partyId = $request->party_id;
+        $poNo = $request->po_no;
+
+        if ($category == "Customer") {
+
+            $order = SalesOrder::where('user_id', auth()->id())
+                ->where('customer_name', $partyId)
+                ->where('po_no', $poNo)
+                ->whereHas('item', function ($q) use ($partNo) {
+                    $q->where('part_number', $partNo);
+                })
+                ->first();
+
+            if (!$order) return response()->json(['status' => false]);
+
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'unit_no'      => $order->unit_no,
+                    'description'  => $order->description,
+                    'qty'          => $order->remain_qty,
+                    'weight'       => $order->weight,
+                    'total_weight' => $order->remain_qty * $order->weight,
+                ]
+            ]);
+        }
+
+        if ($category == "Supplier" || $category == "Jobwork") {
+
+            $supplier = Supplier::with('item', 'sales_unit_number')
+                ->where('user_id', auth()->id())
+                ->where('supplier_name', $partyId)
+                ->where('po_no', $poNo)
+                ->whereHas('item', function ($q) use ($partNo) {
+                    $q->where('part_number', $partNo);
+                })
+                ->first();
+
+            if (!$supplier) return response()->json(['status' => false]);
+
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'unit_no'      => $supplier->sales_unit_number->unit_no ?? null,
+                    'description'  => $supplier->description,
+                    'qty'          => $supplier->remain_qty,
+                    'weight'       => $supplier->weight,
+                    'total_weight' => $supplier->remain_qty * $supplier->weight,
+                ]
+            ]);
+        }
     }
 }

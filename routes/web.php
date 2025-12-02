@@ -103,7 +103,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/edit/{id}', [ProcessController::class, 'edit'])->name('process.edit');
         Route::put('/update/{id}', [ProcessController::class, 'update'])->name('process.update');
         Route::delete('/delete/{id}', [ProcessController::class, 'destroy'])->name('process.delete');
-        
+
         // Drag & Drop Sort
         Route::post('/sort', [ProcessController::class, 'sort'])->name('process.sort');
     });
@@ -129,7 +129,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [EmployeeController::class, 'update'])->name('employee.update');
         Route::get('/destroy/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy');
     });
-    
+
     Route::prefix('machine')->group(function () {
         Route::get('/', [MachineController::class, 'index'])->name('machine.index');
         Route::get('create', [MachineController::class, 'create'])->name('machine.create');
@@ -138,7 +138,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [MachineController::class, 'update'])->name('machine.update');
         Route::get('/destroy/{id}', [MachineController::class, 'destroy'])->name('machine.destroy');
     });
-    
+
     Route::prefix('sales_order')->group(function () {
         Route::get('/', [SalesOrderController::class, 'index'])->name('sales_order.index');
         Route::get('create', [SalesOrderController::class, 'create'])->name('sales_order.create');
@@ -159,7 +159,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
     Route::get('/get-unit-no/{customer}', [SupplierController::class, 'getUnitNo'])->name('get.unit_no');
     Route::get('/get-salesorder-by-id/{id}', [SupplierController::class, 'getSalesOrderById'])
-    ->name('get.salesorder.by.id');
+        ->name('get.salesorder.by.id');
     Route::get('/get-item-details/{id}', [SupplierController::class, 'getItemDetails'])->name('get.item.by.id');
 
     Route::prefix('grn')->group(function () {
@@ -173,5 +173,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/get-parties', [GRNController::class, 'getParties'])->name('get.parties.by.category');
     Route::get('/get-po', [GRNController::class, 'getPoNumbers'])->name('get.po.by.party');
     Route::get('/grn/get-po-details', [GRNController::class, 'getPoDetails'])->name('grn.getPoDetails');
-
+    Route::get('/grn/get-po-items', [GRNController::class, 'getPoItems'])->name('grn.getPoItems');
+    Route::get('/grn/get-item-by-unit', [GRNController::class, 'getItemByUnit'])->name('grn.getItemByUnit');
+    Route::get('/grn/get-item-by-part', [GRNController::class, 'getItemByPart'])->name('grn.getItemByPart');
 });

@@ -58,9 +58,9 @@
                                     <label for="category" class="form-label">Category</label>
                                     <select name="category" id="category" class="form-control">
                                         <option value="">Select Category</option>
-                                        <option value="Customer" {{ old('category', $grn->category) == 'Customer' ? 'selected' : '' }}>Customer</option>
-                                        <option value="Supplier" {{ old('category', $grn->category) == 'Supplier' ? 'selected' : '' }}>Supplier</option>
-                                        <option value="Jobwork" {{ old('category', $grn->category) == 'Jobwork' ? 'selected' : '' }}>Jobwork</option>
+                                        <option value="Customer" {{ old('category', $grn->category)=='Customer' ? 'selected' : '' }}>Customer</option>
+                                        <option value="Supplier" {{ old('category', $grn->category)=='Supplier' ? 'selected' : '' }}>Supplier</option>
+                                        <option value="Jobwork" {{ old('category', $grn->category)=='Jobwork' ? 'selected' : '' }}>Jobwork</option>
                                     </select>
                                     <span class="text-danger"></span>
                                 </div>
@@ -95,13 +95,17 @@
 
                                 <div class="col-md-6 mb-3">
                                     <label for="unit_no" class="form-label">Unit No</label>
-                                    <input type="text" name="unit_no" id="unit_no" class="form-control" value="{{ old('unit_no', $grn->unit_no) }}">
+                                    <select name="unit_no" id="unit_no" class="form-control">
+                                        <option value="">Select Unit No</option>
+                                    </select>
                                     <span class="text-danger"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label for="part_no" class="form-label">Part No</label>
-                                    <input type="text" name="part_no" id="part_no" class="form-control" value="{{ old('part_no', $grn->part_no) }}">
+                                    <select name="part_no" id="part_no" class="form-control">
+                                        <option value="">Select Part No</option>
+                                    </select>
                                     <span class="text-danger"></span>
                                 </div>
 
@@ -158,45 +162,9 @@ function calculateTotalWeight() {
     let weight = parseFloat($('#weight').val()) || 0;
     $('#total_weight').val((qty * weight).toFixed(2));
 }
-
 $('#qty, #weight').on('input', calculateTotalWeight);
 
-$(document).ready(function() {
-
-    const fields = [
-        {id:'#grn_date', name:'GRN Date'},
-        {id:'#category', name:'Category'},
-        {id:'#party_name', name:'Party Name'},
-        {id:'#po_no', name:'PO Number'},
-        {id:'#party_challan_no', name:'Party Challan Number'},
-        {id:'#party_challan_date', name:'Party Challan Date'},
-        {id:'#part_no', name:'Part Number'},
-        {id:'#description', name:'Description'},
-        {id:'#qty', name:'Quantity'},
-        {id:'#weight', name:'Weight'}
-    ];
-
-    function validateField(id, name){
-        const field = $(id);
-        const value = field.val().trim();
-        let isValid = true;
-        let message = '';
-        if(!value){ isValid=false; message = `${name} is required.`; }
-        field.toggleClass('is-invalid', !isValid);
-        field.toggleClass('is-valid', isValid);
-        field.siblings('.text-danger').text(message);
-        return isValid;
-    }
-
-    fields.forEach(f => {
-        $(f.id).on('input change', function(){ validateField(f.id,f.name); });
-    });
-
-    $('#myform').on('submit', function(e){
-        let valid=true;
-        fields.forEach(f => { if(!validateField(f.id,f.name)) valid=false; });
-        if(!valid) e.preventDefault();
-    });
+$(document).ready(function(){
 
     function resetParty(){ $('#party_name').empty().append('<option value="">Select Party</option>'); resetPO(); resetFields(); }
     function resetPO(){ $('#po_no').empty().append('<option value="">Select PO Number</option>'); resetFields(); }
@@ -234,41 +202,85 @@ $(document).ready(function() {
                         let selected = po==selectedPO?'selected':'';
                         $('#po_no').append('<option value="'+po+'" '+selected+'>'+po+'</option>');
                     });
-                    if(selectedPO) loadPoDetails(category, partyId, selectedPO);
+                    if(selectedPO) loadPoItems(category, partyId, selectedPO);
                 }
             }
         });
     }
 
-    function loadPoDetails(category, partyId, poNo){
+    function loadPoItems(category, partyId, poNo){
         if(!category || !partyId || !poNo) return;
         $.ajax({
-            url:"{{ route('grn.getPoDetails') }}",
+            url:"{{ route('grn.getPoItems') }}",
             type:"GET",
             data:{category:category, party_id:partyId, po_no:poNo},
             success:function(res){
+                $('#unit_no').html('<option value="">Select Unit</option>');
+                $('#part_no').html('<option value="">Select Part</option>');
+                res.unit_numbers.forEach(u => $('#unit_no').append(`<option value="${u}">${u}</option>`));
+                res.part_numbers.forEach(p => $('#part_no').append(`<option value="${p}">${p}</option>`));
+
+                // Auto-select existing unit/part if matching
+                $('#unit_no').val('{{ $grn->unit_no }}');
+                $('#part_no').val('{{ $grn->part_no }}');
+                $('#description').val('{{ $grn->description }}');
+                $('#qty').val('{{ $grn->qty }}');
+                $('#weight').val('{{ $grn->weight }}');
+                calculateTotalWeight();
+            }
+        });
+    }
+
+    $('#unit_no').on('change', function(){
+        $.ajax({
+            url:"{{ route('grn.getItemByUnit') }}",
+            data:{
+                unit_no: $(this).val(),
+                category: $('#category').val(),
+                party_id: $('#party_name').val(),
+                po_no: $('#po_no').val()
+            },
+            success:function(res){
                 if(res.status){
-                    $('#unit_no').val(res.data.unit_no);
                     $('#part_no').val(res.data.part_no);
                     $('#description').val(res.data.description);
                     $('#qty').val(res.data.qty);
                     $('#weight').val(res.data.weight);
-                    $('#total_weight').val(res.data.total_weight);
+                    calculateTotalWeight();
                 }
             }
         });
-    }
+    });
 
-    // Load initial data
+    $('#part_no').on('change', function(){
+        $.ajax({
+            url:"{{ route('grn.getItemByPart') }}",
+            data:{
+                part_no: $(this).val(),
+                category: $('#category').val(),
+                party_id: $('#party_name').val(),
+                po_no: $('#po_no').val()
+            },
+            success:function(res){
+                if(res.status){
+                    $('#unit_no').val(res.data.unit_no);
+                    $('#description').val(res.data.description);
+                    $('#qty').val(res.data.qty);
+                    $('#weight').val(res.data.weight);
+                    calculateTotalWeight();
+                }
+            }
+        });
+    });
+
+    // Initial load
     let initialCategory='{{ $grn->category }}';
     let initialParty='{{ $grn->party_name }}';
-    let initialPO='{{ $grn->po_no }}';
     if(initialCategory){ loadParties(initialCategory, initialParty); }
 
-    // Event listeners
-    $('#category').on('change',function(){ loadParties($(this).val()); });
-    $('#party_name').on('change',function(){ loadPoNumbers($('#category').val(), $(this).val()); });
-    $('#po_no').on('change',function(){ loadPoDetails($('#category').val(), $('#party_name').val(), $(this).val()); });
+    $('#category').on('change', function(){ loadParties($(this).val()); });
+    $('#party_name').on('change', function(){ loadPoNumbers($('#category').val(), $(this).val()); });
+    $('#po_no').on('change', function(){ loadPoItems($('#category').val(), $('#party_name').val(), $(this).val()); });
 
 });
 </script>

@@ -97,15 +97,19 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="unit_no" class="form-label">Unit No</label>
-                                        <input type="text" name="unit_no" id="unit_no" class="form-control"
-                                            value="{{ old('unit_no') }}">
+                                        <select name="unit_no" id="unit_no" class="form-control">
+                                            <option value="">Select Unit No</option>
+                                        </select>
+
                                         <span class="text-danger"></span>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="part_no" class="form-label">Part No</label>
-                                        <input type="text" name="part_no" id="part_no" class="form-control"
-                                            value="{{ old('part_no') }}">
+                                        <select name="part_no" id="part_no" class="form-control">
+                                            <option value="">Select Part No</option>
+                                        </select>
+
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -329,33 +333,65 @@
         });
 
         $('#po_no').on('change', function() {
-
-            let category = $('#category').val();
-            let party_id = $('#party_name').val();
-            let po_no = $(this).val();
-
-            resetFields();
-
-            if (category === "" || party_id === "" || po_no === "") return;
-
             $.ajax({
-                url: "{{ route('grn.getPoDetails') }}",
-                type: "GET",
+                url: "{{ route('grn.getPoItems') }}",
                 data: {
-                    category: category,
-                    party_id: party_id,
-                    po_no: po_no
+                    category: $('#category').val(),
+                    party_id: $('#party_name').val(),
+                    po_no: $('#po_no').val()
                 },
                 success: function(res) {
-                    if (res.status === true) {
-                        $('#unit_no').val(res.data.unit_no);
+                    $('#unit_no').html('<option value="">Select Unit</option>');
+                    $('#part_no').html('<option value="">Select Part</option>');
+
+                    res.unit_numbers.forEach(u => {
+                        $('#unit_no').append(`<option value="${u}">${u}</option>`);
+                    });
+
+                    res.part_numbers.forEach(p => {
+                        $('#part_no').append(`<option value="${p}">${p}</option>`);
+                    });
+                }
+            });
+        });
+
+        $('#unit_no').on('change', function() {
+            $.ajax({
+                url: "{{ route('grn.getItemByUnit') }}",
+                data: {
+                    unit_no: $(this).val(),
+                    category: $('#category').val(),
+                    party_id: $('#party_name').val(),
+                    po_no: $('#po_no').val()
+                },
+                success: function(res) {
+                    if (res.status) {
                         $('#part_no').val(res.data.part_no);
                         $('#description').val(res.data.description);
                         $('#qty').val(res.data.qty);
                         $('#weight').val(res.data.weight);
                         $('#total_weight').val(res.data.total_weight);
-                    } else {
-                        alert(res.message);
+                    }
+                }
+            });
+        });
+
+        $('#part_no').on('change', function() {
+            $.ajax({
+                url: "{{ route('grn.getItemByPart') }}",
+                data: {
+                    part_no: $(this).val(),
+                    category: $('#category').val(),
+                    party_id: $('#party_name').val(),
+                    po_no: $('#po_no').val()
+                },
+                success: function(res) {
+                    if (res.status) {
+                        $('#unit_no').val(res.data.unit_no);
+                        $('#description').val(res.data.description);
+                        $('#qty').val(res.data.qty);
+                        $('#weight').val(res.data.weight);
+                        $('#total_weight').val(res.data.total_weight);
                     }
                 }
             });
