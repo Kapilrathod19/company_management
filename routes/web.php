@@ -93,12 +93,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
 
     Route::prefix('item')->group(function () {
-        Route::get('/', [ItemController::class, 'index'])->name('item.index');
-        Route::get('create', [ItemController::class, 'create'])->name('item.create');
-        Route::post('/store', [ItemController::class, 'store'])->name('item.store');
-        Route::get('/edit/{id}', [ItemController::class, 'edit'])->name('item.edit');
-        Route::put('/update/{id}', [ItemController::class, 'update'])->name('item.update');
-        Route::get('/destroy/{id}', [ItemController::class, 'destroy'])->name('item.destroy');
+        Route::get('/', [ItemController::class, 'index'])->name('item.index')->middleware('permission:item_master,view');
+        Route::get('create', [ItemController::class, 'create'])->name('item.create')->middleware('permission:item_master,add');
+        Route::post('/store', [ItemController::class, 'store'])->name('item.store')->middleware('permission:item_master,add');
+        Route::get('/edit/{id}', [ItemController::class, 'edit'])->name('item.edit')->middleware('permission:item_master,edit');
+        Route::put('/update/{id}', [ItemController::class, 'update'])->name('item.update')->middleware('permission:item_master,edit');
+        Route::get('/destroy/{id}', [ItemController::class, 'destroy'])->name('item.destroy')->middleware('permission:item_master,delete');
     });
 
     Route::prefix('process-item/{item}')->group(function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Permission;
 use App\Models\Process;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,8 @@ class ItemController extends Controller
     public function index()
     {
         $items = Item::where('user_id', auth()->id())->latest()->get();
-        return view('user.item.list_item', compact('items'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.item.list_item', compact('items','permissions'));
     }
 
 
