@@ -126,12 +126,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
 
     Route::prefix('employee')->group(function () {
-        Route::get('/', [EmployeeController::class, 'index'])->name('employee.index');
-        Route::get('create', [EmployeeController::class, 'create'])->name('employee.create');
-        Route::post('/store', [EmployeeController::class, 'store'])->name('employee.store');
-        Route::get('/edit/{id}', [EmployeeController::class, 'edit'])->name('employee.edit');
-        Route::put('/update/{id}', [EmployeeController::class, 'update'])->name('employee.update');
-        Route::get('/destroy/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy');
+        Route::get('/', [EmployeeController::class, 'index'])->name('employee.index')->middleware('permission:employee_master,view');
+        Route::get('create', [EmployeeController::class, 'create'])->name('employee.create')->middleware('permission:employee_master,add');
+        Route::post('/store', [EmployeeController::class, 'store'])->name('employee.store')->middleware('permission:employee_master,add');
+        Route::get('/edit/{id}', [EmployeeController::class, 'edit'])->name('employee.edit')->middleware('permission:employee_master,edit');
+        Route::put('/update/{id}', [EmployeeController::class, 'update'])->name('employee.update')->middleware('permission:employee_master,edit');
+        Route::get('/destroy/{id}', [EmployeeController::class, 'destroy'])->name('employee.destroy')->middleware('permission:employee_master,delete');
     });
 
     Route::prefix('machine')->group(function () {

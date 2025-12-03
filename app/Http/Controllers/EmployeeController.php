@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -10,7 +11,8 @@ class EmployeeController extends Controller
     public function index()
     {
         $employees = Employee::where('user_id', auth()->id())->latest()->get();
-        return view('user.employee.list_employee', compact('employees'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.employee.list_employee', compact('employees', 'permissions'));
     }
 
 
