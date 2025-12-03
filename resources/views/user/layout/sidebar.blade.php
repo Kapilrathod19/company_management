@@ -1,5 +1,6 @@
 @php
     $setting = App\Models\Setting::first();
+    $permissions = App\Models\Permission::where('user_id', auth()->id())->get()->keyBy('module');
 @endphp
 <div class="iq-sidebar  sidebar-default">
     <div class="iq-sidebar-logo d-flex align-items-end justify-content-between">
@@ -28,60 +29,78 @@
                         <span class="ml-2">Dashboard</span>
                     </a>
                 </li>
-                <li class="@if (str_contains(Request::url(), '/party')) active @endif sidebar-layout">
-                    <a href="{{ route('party.index') }}" class="svg-icon">
-                        <i class="bi bi-people"></i>
-                        <span class="ml-2">Party Master</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/item')) active @endif sidebar-layout">
-                    <a href="{{ route('item.index') }}" class="svg-icon">
-                        <i class="bi bi-box-seam"></i>
-                        <span class="ml-2">Item Master</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/process_master')) active @endif sidebar-layout">
-                    <a href="{{ route('process_master.index') }}" class="svg-icon">
-                        <i class="bi bi-diagram-3"></i>
-                        <span class="ml-2">Process Master</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/process-item')) active @endif sidebar-layout">
-                    <a href="{{ route('process.items') }}" class="svg-icon">
-                        <i class="bi bi-diagram-3"></i>
-                        <span class="ml-2">Item Processes</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/employee')) active @endif sidebar-layout">
-                    <a href="{{ route('employee.index') }}" class="svg-icon">
-                        <i class="bi bi-people"></i>
-                        <span class="ml-2">Employee Master</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/machine')) active @endif sidebar-layout">
-                    <a href="{{ route('machine.index') }}" class="svg-icon">
-                        <i class="bi bi-gear"></i>
-                        <span class="ml-2">Machine Master</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/sales_order')) active @endif sidebar-layout">
-                    <a href="{{ route('sales_order.index') }}" class="svg-icon">
-                        <i class="bi bi-cart4"></i>
-                        <span class="ml-2">Sales Order</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/supplier')) active @endif sidebar-layout">
-                    <a href="{{ route('supplier.index') }}" class="svg-icon">
-                        <i class="bi bi-truck"></i>
-                        <span class="ml-2">Supplier PO</span>
-                    </a>
-                </li>
-                <li class="@if (str_contains(Request::url(), '/grn')) active @endif sidebar-layout">
-                    <a href="{{ route('grn.index') }}" class="svg-icon">
-                        <i class="bi bi-file-earmark-check"></i>
-                        <span class="ml-2">GRN</span>
-                    </a>
-                </li>
+                @if (isset($permissions['party_master']) && $permissions['party_master']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/party')) active @endif sidebar-layout">
+                        <a href="{{ route('party.index') }}" class="svg-icon">
+                            <i class="bi bi-people"></i>
+                            <span class="ml-2">Party Master</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['item_master']) && $permissions['item_master']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/item')) active @endif sidebar-layout">
+                        <a href="{{ route('item.index') }}" class="svg-icon">
+                            <i class="bi bi-box-seam"></i>
+                            <span class="ml-2">Item Master</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['process_master']) && $permissions['process_master']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/process_master')) active @endif sidebar-layout">
+                        <a href="{{ route('process_master.index') }}" class="svg-icon">
+                            <i class="bi bi-diagram-3"></i>
+                            <span class="ml-2">Process Master</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['item_process']) && $permissions['item_process']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/process-item')) active @endif sidebar-layout">
+                        <a href="{{ route('process.items') }}" class="svg-icon">
+                            <i class="bi bi-diagram-3"></i>
+                            <span class="ml-2">Item Processes</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['employee_master']) && $permissions['employee_master']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/employee')) active @endif sidebar-layout">
+                        <a href="{{ route('employee.index') }}" class="svg-icon">
+                            <i class="bi bi-people"></i>
+                            <span class="ml-2">Employee Master</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['machine_master']) && $permissions['machine_master']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/machine')) active @endif sidebar-layout">
+                        <a href="{{ route('machine.index') }}" class="svg-icon">
+                            <i class="bi bi-gear"></i>
+                            <span class="ml-2">Machine Master</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['sales_order']) && $permissions['sales_order']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/sales_order')) active @endif sidebar-layout">
+                        <a href="{{ route('sales_order.index') }}" class="svg-icon">
+                            <i class="bi bi-cart4"></i>
+                            <span class="ml-2">Sales Order</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['supplier_PO']) && $permissions['supplier_PO']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/supplier')) active @endif sidebar-layout">
+                        <a href="{{ route('supplier.index') }}" class="svg-icon">
+                            <i class="bi bi-truck"></i>
+                            <span class="ml-2">Supplier PO</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['grn']) && $permissions['grn']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/grn')) active @endif sidebar-layout">
+                        <a href="{{ route('grn.index') }}" class="svg-icon">
+                            <i class="bi bi-file-earmark-check"></i>
+                            <span class="ml-2">GRN</span>
+                        </a>
+                    </li>
+                @endif
 
             </ul>
         </nav>
