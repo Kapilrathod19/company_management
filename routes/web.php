@@ -135,12 +135,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
 
     Route::prefix('machine')->group(function () {
-        Route::get('/', [MachineController::class, 'index'])->name('machine.index');
-        Route::get('create', [MachineController::class, 'create'])->name('machine.create');
-        Route::post('/store', [MachineController::class, 'store'])->name('machine.store');
-        Route::get('/edit/{id}', [MachineController::class, 'edit'])->name('machine.edit');
-        Route::put('/update/{id}', [MachineController::class, 'update'])->name('machine.update');
-        Route::get('/destroy/{id}', [MachineController::class, 'destroy'])->name('machine.destroy');
+        Route::get('/', [MachineController::class, 'index'])->name('machine.index')->middleware('permission:machine_master,view');
+        Route::get('create', [MachineController::class, 'create'])->name('machine.create')->middleware('permission:machine_master,add');
+        Route::post('/store', [MachineController::class, 'store'])->name('machine.store')->middleware('permission:machine_master,add');
+        Route::get('/edit/{id}', [MachineController::class, 'edit'])->name('machine.edit')->middleware('permission:machine_master,edit');
+        Route::put('/update/{id}', [MachineController::class, 'update'])->name('machine.update')->middleware('permission:machine_master,edit');
+        Route::get('/destroy/{id}', [MachineController::class, 'destroy'])->name('machine.destroy')->middleware('permission:machine_master,delete');
     });
 
     Route::prefix('sales_order')->group(function () {

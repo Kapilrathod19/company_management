@@ -11,8 +11,10 @@
                                 <h5 class="card-title">Machine List</h5>
                             </div>
                             <div class="header-action">
-                                <a class="btn btn-primary" href="{{ route('machine.create') }}" role="button"><i
-                                        class="bi bi-plus"></i> Add Machine</a>
+                                @if (isset($permissions['machine_master']) && $permissions['machine_master']->add == 1)
+                                    <a class="btn btn-primary" href="{{ route('machine.create') }}" role="button"><i
+                                            class="bi bi-plus"></i> Add Machine</a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -38,18 +40,23 @@
                                                 <td>{{ $item->category ?? '' }}</td>
                                                 <td>{{ $item->machine_no ?? '' }}</td>
                                                 <td>{{ $item->machine_name ?? '' }}</td>
-                                                <td>{{ $item->calibration_date ? date('d-M-Y', strtotime($item->calibration_date)) : '' }}</td>
+                                                <td>{{ $item->calibration_date ? date('d-M-Y', strtotime($item->calibration_date)) : '' }}
+                                                </td>
                                                 <td>{{ $item->remark ?? '' }}</td>
                                                 <td>
-                                                    <a class="btn btn-primary btn-sm mb-2"
-                                                        href="{{ route('machine.edit', $item->id) }}" role="button">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </a>
-                                                    <a class="btn btn-danger btn-sm delete-confirm mb-2"
-                                                        href="javascript:void(0)" data-id="{{ $item->id }}"
-                                                        role="button">
-                                                        <i class="bi bi-trash-fill"></i>
-                                                    </a>
+                                                    @if (isset($permissions['machine_master']) && $permissions['machine_master']->edit == 1)
+                                                        <a class="btn btn-primary btn-sm mb-2"
+                                                            href="{{ route('machine.edit', $item->id) }}" role="button">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </a>
+                                                    @endif
+                                                    @if (isset($permissions['machine_master']) && $permissions['machine_master']->delete == 1)
+                                                        <a class="btn btn-danger btn-sm delete-confirm mb-2"
+                                                            href="javascript:void(0)" data-id="{{ $item->id }}"
+                                                            role="button">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </a>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Machine;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
 class MachineController extends Controller
@@ -10,7 +11,8 @@ class MachineController extends Controller
     public function index()
     {
         $machines = Machine::where('user_id', auth()->id())->latest()->get();
-        return view('user.machine.list_machine', compact('machines'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.machine.list_machine', compact('machines', 'permissions'));
     }
 
     public function create()
