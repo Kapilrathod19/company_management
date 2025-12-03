@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Grn;
 use App\Models\Item;
 use App\Models\Party;
+use App\Models\Permission;
 use App\Models\SalesOrder;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -14,7 +15,8 @@ class GrnController extends Controller
     public function index()
     {
         $grns = Grn::where('user_id', auth()->id())->latest()->get();
-        return view('user.grn.list_grn', compact('grns'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.grn.list_grn', compact('grns', 'permissions'));
     }
 
     public function create()

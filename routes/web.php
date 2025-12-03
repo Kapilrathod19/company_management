@@ -167,12 +167,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/get-item-details/{id}', [SupplierController::class, 'getItemDetails'])->name('get.item.by.id');
 
     Route::prefix('grn')->group(function () {
-        Route::get('/', [GrnController::class, 'index'])->name('grn.index');
-        Route::get('create', [GrnController::class, 'create'])->name('grn.create');
-        Route::post('/store', [GrnController::class, 'store'])->name('grn.store');
-        Route::get('/edit/{id}', [GrnController::class, 'edit'])->name('grn.edit');
-        Route::put('/update/{id}', [GrnController::class, 'update'])->name('grn.update');
-        Route::get('/destroy/{id}', [GrnController::class, 'destroy'])->name('grn.destroy');
+        Route::get('/', [GrnController::class, 'index'])->name('grn.index')->middleware('permission:grn,view');
+        Route::get('create', [GrnController::class, 'create'])->name('grn.create')->middleware('permission:grn,add');
+        Route::post('/store', [GrnController::class, 'store'])->name('grn.store')->middleware('permission:grn,add');
+        Route::get('/edit/{id}', [GrnController::class, 'edit'])->name('grn.edit')->middleware('permission:grn,edit');
+        Route::put('/update/{id}', [GrnController::class, 'update'])->name('grn.update')->middleware('permission:grn,edit');
+        Route::get('/destroy/{id}', [GrnController::class, 'destroy'])->name('grn.destroy')->middleware('permission:grn,delete');
     });
     Route::get('/get-parties', [GrnController::class, 'getParties'])->name('get.parties.by.category');
     Route::get('/get-po', [GrnController::class, 'getPoNumbers'])->name('get.po.by.party');
