@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Party;
+use App\Models\Permission;
 use App\Models\SalesOrder;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -13,7 +14,8 @@ class SupplierController extends Controller
     public function index()
     {
         $suppliers = Supplier::with('party', 'item', 'sales_order', 'sales_unit_number')->where('user_id', auth()->id())->latest()->get();
-        return view('user.supplier.list_supplier', compact('suppliers'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.supplier.list_supplier', compact('suppliers', 'permissions'));
     }
 
     public function create()

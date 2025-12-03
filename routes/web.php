@@ -154,12 +154,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('get-item/{id}', [SalesOrderController::class, 'getItem'])->name('item.get');
 
     Route::prefix('supplier')->group(function () {
-        Route::get('/', [SupplierController::class, 'index'])->name('supplier.index');
-        Route::get('create', [SupplierController::class, 'create'])->name('supplier.create');
-        Route::post('/store', [SupplierController::class, 'store'])->name('supplier.store');
-        Route::get('/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
-        Route::put('/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
-        Route::get('/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+        Route::get('/', [SupplierController::class, 'index'])->name('supplier.index')->middleware('permission:supplier_PO,view');
+        Route::get('create', [SupplierController::class, 'create'])->name('supplier.create')->middleware('permission:supplier_PO,add');
+        Route::post('/store', [SupplierController::class, 'store'])->name('supplier.store')->middleware('permission:supplier_PO,add');
+        Route::get('/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit')->middleware('permission:supplier_PO,edit');
+        Route::put('/update/{id}', [SupplierController::class, 'update'])->name('supplier.update')->middleware('permission:supplier_PO,edit');
+        Route::get('/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy')->middleware('permission:supplier_PO,delete');
     });
     Route::get('/get-unit-no/{customer}', [SupplierController::class, 'getUnitNo'])->name('get.unit_no');
     Route::get('/get-salesorder-by-id/{id}', [SupplierController::class, 'getSalesOrderById'])
