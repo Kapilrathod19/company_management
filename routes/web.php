@@ -144,12 +144,12 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
 
     Route::prefix('sales_order')->group(function () {
-        Route::get('/', [SalesOrderController::class, 'index'])->name('sales_order.index');
-        Route::get('create', [SalesOrderController::class, 'create'])->name('sales_order.create');
-        Route::post('/store', [SalesOrderController::class, 'store'])->name('sales_order.store');
-        Route::get('/edit/{id}', [SalesOrderController::class, 'edit'])->name('sales_order.edit');
-        Route::put('/update/{id}', [SalesOrderController::class, 'update'])->name('sales_order.update');
-        Route::get('/destroy/{id}', [SalesOrderController::class, 'destroy'])->name('sales_order.destroy');
+        Route::get('/', [SalesOrderController::class, 'index'])->name('sales_order.index')->middleware('permission:sales_order,view');
+        Route::get('create', [SalesOrderController::class, 'create'])->name('sales_order.create')->middleware('permission:sales_order,add');
+        Route::post('/store', [SalesOrderController::class, 'store'])->name('sales_order.store')->middleware('permission:sales_order,add');
+        Route::get('/edit/{id}', [SalesOrderController::class, 'edit'])->name('sales_order.edit')->middleware('permission:sales_order,edit');
+        Route::put('/update/{id}', [SalesOrderController::class, 'update'])->name('sales_order.update')->middleware('permission:sales_order,edit');
+        Route::get('/destroy/{id}', [SalesOrderController::class, 'destroy'])->name('sales_order.destroy')->middleware('permission:sales_order,delete');
     });
     Route::get('get-item/{id}', [SalesOrderController::class, 'getItem'])->name('item.get');
 

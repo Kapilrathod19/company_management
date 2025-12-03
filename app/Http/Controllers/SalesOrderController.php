@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Party;
+use App\Models\Permission;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,8 @@ class SalesOrderController extends Controller
     public function index()
     {
         $salesorders = SalesOrder::with('party', 'item')->where('user_id', auth()->id())->latest()->get();
-        return view('user.sales_orders.list_salesorders', compact('salesorders'));
+        $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
+        return view('user.sales_orders.list_salesorders', compact('salesorders', 'permissions'));
     }
 
     public function create()
