@@ -101,6 +101,14 @@
                         </a>
                     </li>
                 @endif
+                @if (isset($permissions['production']) && $permissions['production']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/production')) active @endif sidebar-layout">
+                        <a href="{{ route('production.index') }}" class="svg-icon">
+                            <i class="bi bi-gear-wide-connected"></i>
+                            <span class="ml-2">Production</span>
+                        </a>
+                    </li>
+                @endif
 
             </ul>
         </nav>

@@ -18,6 +18,7 @@ class PermissionController extends Controller
         'sales_order',
         'supplier_PO',
         'grn',
+        'production',
     ];
 
     public function index($userId)

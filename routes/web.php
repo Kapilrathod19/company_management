@@ -13,6 +13,7 @@ use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProcessController;
+use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SupplierController;
@@ -180,4 +181,18 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/grn/get-po-items', [GrnController::class, 'getPoItems'])->name('grn.getPoItems');
     Route::get('/grn/get-item-by-unit', [GrnController::class, 'getItemByUnit'])->name('grn.getItemByUnit');
     Route::get('/grn/get-item-by-part', [GrnController::class, 'getItemByPart'])->name('grn.getItemByPart');
+    
+    Route::prefix('production')->group(function () {
+        Route::get('/', [ProductionController::class, 'index'])->name('production.index')->middleware('permission:production,view');
+        Route::get('create', [ProductionController::class, 'create'])->name('production.create')->middleware('permission:production,add');
+        Route::post('/store', [ProductionController::class, 'store'])->name('production.store')->middleware('permission:production,add');
+        Route::get('/edit/{id}', [ProductionController::class, 'edit'])->name('production.edit')->middleware('permission:production,edit');
+        Route::put('/update/{id}', [ProductionController::class, 'update'])->name('production.update')->middleware('permission:production,edit');
+        Route::get('/destroy/{id}', [ProductionController::class, 'destroy'])->name('production.destroy')->middleware('permission:production,delete');
+    });
+    Route::get('/get-components/{id}', [ProductionController::class, 'getComponents'])->name('get.components');
+    Route::get('/get-component-details/{id}', [ProductionController::class, 'getComponentDetails'])
+    ->name('get.component.details');
+
+
 });
