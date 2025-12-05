@@ -32,7 +32,7 @@
                                             <th>Party Challan No</th>
                                             <th>Party Challan Date</th>
                                             <th>Unit No</th>
-                                            <th>Part No</th>
+                                            <th>Component No</th>
                                             <th>Description</th>
                                             <th>Qty</th>
                                             <th>Weight</th>
