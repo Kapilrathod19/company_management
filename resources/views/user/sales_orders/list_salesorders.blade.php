@@ -28,7 +28,7 @@
                                             <th>Customer Name</th>
                                             <th>PO No</th>
                                             <th>PO Date</th>
-                                            <th>Part No</th>
+                                            <th>Component No</th>
                                             <th>Description</th>
                                             <th>Unit</th>
                                             <th>Qty</th>

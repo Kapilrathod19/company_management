@@ -72,7 +72,7 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Part Number</label>
+                                        <label class="form-label">Component Number</label>
                                         <select name="part_no" class="form-control" id="part_no">
                                             <option value="">Select Part Number</option>
                                             @foreach ($items as $part)
@@ -223,7 +223,7 @@
                 },
                 {
                     id: '#part_no',
-                    name: 'Part Number'
+                    name: 'Component Number'
                 },
                 {
                     id: '#description',
