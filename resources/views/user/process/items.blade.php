@@ -22,7 +22,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Part No</th>
+                                            <th>Component No</th>
                                             <th>Description</th>
                                             <th>Action</th>
                                         </tr>
