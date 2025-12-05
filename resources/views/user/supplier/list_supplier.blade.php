@@ -31,7 +31,7 @@
                                             <th>Customer Name</th>
                                             <th>Sales Po No</th>
                                             <th>Unit No</th>
-                                            <th>Part No</th>
+                                            <th>Component No</th>
                                             <th>Description</th>
                                             <th>Qty</th>
                                             <th>Weight</th>

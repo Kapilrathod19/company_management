@@ -102,9 +102,9 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="part_no" class="form-label">Part Number</label>
+                                        <label for="part_no" class="form-label">Component Number</label>
                                         <select name="part_no" id="part_no" class="form-control">
-                                            <option value="">Select Part Number</option>
+                                            <option value="">Select Component Number</option>
                                             @foreach ($items as $item)
                                                 <option value="{{ $item->id }}"
                                                     {{ old('part_no') == $item->id ? 'selected' : '' }}>
@@ -192,7 +192,7 @@
                 },
                 {
                     id: '#part_no',
-                    name: 'Part Number'
+                    name: 'Component Number'
                 },
                 {
                     id: '#description',
