@@ -39,7 +39,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Category</th>
-                                            <th>Part No</th>
+                                            <th>Component No</th>
                                             <th>Description</th>
                                             <th>Unit</th>
                                             <th>Quntity</th>

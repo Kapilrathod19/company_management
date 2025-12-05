@@ -65,7 +65,7 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="part_number" class="form-label">Part Number</label>
+                                        <label for="part_number" class="form-label">Component Number</label>
                                         <input type="text" name="part_number" id="part_number" class="form-control"
                                             value="{{ old('part_number', $item->part_number) }}">
                                         <span class="text-danger"></span>
@@ -123,7 +123,7 @@
                 },
                 {
                     id: '#part_number',
-                    name: 'Part Number'
+                    name: 'Component Number'
                 },
                 {
                     id: '#unit',
