@@ -77,7 +77,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="part_no" class="form-label">Component Number</label>
                                         <select name="part_no" id="part_no" class="form-control">
-                                            <option value="">Select Part Number</option>
+                                            <option value="">Select Component Number</option>
                                             @foreach ($items as $part)
                                                 <option value="{{ $part->id }}"
                                                     {{ old('part_no') == $part->id ? 'selected' : '' }}>

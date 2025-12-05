@@ -74,7 +74,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Component Number</label>
                                         <select name="part_no" class="form-control" id="part_no">
-                                            <option value="">Select Part Number</option>
+                                            <option value="">Select Component Number</option>
                                             @foreach ($items as $part)
                                                 <option value="{{ $part->id }}"
                                                     {{ $salesOrder->part_no == $part->id ? 'selected' : '' }}>
