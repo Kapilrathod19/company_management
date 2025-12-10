@@ -15,6 +15,7 @@ class Employee extends Model
         'emp_no',
         'employee_name',
         'designation',
+        'category',
         'contact_no',
         'certificate',
         'status',

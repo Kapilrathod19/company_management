@@ -77,14 +77,30 @@
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="category" class="form-label">Category</label>
+                                        <select name="category" id="category" class="form-control">
+                                            <option value="">Select Category</option>
+                                            <option value="Company"
+                                                {{ old('category', $item->category) == 'Company' ? 'selected' : '' }}>
+                                                Company
+                                            </option>
+                                            <option value="Contract Supply"
+                                                {{ old('category', $item->category) == 'Contract Supply' ? 'selected' : '' }}>
+                                                Contract Supply
+                                            </option>
+                                        </select>
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
                                         <label for="contact_no" class="form-label">Contact Number</label>
                                         <input type="text" name="contact_no" id="contact_no" class="form-control"
                                             value="{{ old('contact_no', $item->contact_no) }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="status" class="form-label">Status</label>
                                         <select name="status" id="status" class="form-control">
                                             <option value="Active"

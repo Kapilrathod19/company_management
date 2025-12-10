@@ -29,6 +29,7 @@
                                             <th>Employee No</th>
                                             <th>Employee Name</th>
                                             <th>Designation</th>
+                                            <th>Category</th>
                                             <th>Contact No</th>
                                             <th>Certificate</th>
                                             <th>Status</th>
@@ -43,6 +44,7 @@
                                                 <td>{{ $item->emp_no }}</td>
                                                 <td>{{ $item->employee_name }}</td>
                                                 <td>{{ $item->designation }}</td>
+                                                <td>{{ $item->category ?? '' }}</td>
                                                 <td>{{ $item->contact_no }}</td>
                                                 <td>
                                                     @if ($item->certificate)
