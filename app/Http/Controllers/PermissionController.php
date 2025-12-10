@@ -20,6 +20,7 @@ class PermissionController extends Controller
         'grn',
         'production',
         'employee_work',
+        'calibration'
     ];
 
     public function index($userId)

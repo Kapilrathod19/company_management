@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminUsersController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CalibrationController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
@@ -203,5 +204,15 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [EmployeeWorkController::class, 'update'])->name('employee_work.update')->middleware('permission:employee_work,edit');
         Route::get('/destroy/{id}', [EmployeeWorkController::class, 'destroy'])->name('employee_work.destroy')->middleware('permission:employee_work,delete');
     });
+    
+    Route::prefix('calibration')->group(function () {
+        Route::get('/', [CalibrationController::class, 'index'])->name('calibration.index')->middleware('permission:calibration,view');
+        Route::get('create', [CalibrationController::class, 'create'])->name('calibration.create')->middleware('permission:calibration,add');
+        Route::post('/store', [CalibrationController::class, 'store'])->name('calibration.store')->middleware('permission:calibration,add');
+        Route::get('/edit/{id}', [CalibrationController::class, 'edit'])->name('calibration.edit')->middleware('permission:calibration,edit');
+        Route::put('/update/{id}', [CalibrationController::class, 'update'])->name('calibration.update')->middleware('permission:calibration,edit');
+        Route::get('/destroy/{id}', [CalibrationController::class, 'destroy'])->name('calibration.destroy')->middleware('permission:calibration,delete');
+    });
+    Route::get('/machine/details/{id}', [CalibrationController::class, 'getMachineDetails'])->name('machine.details');
 
 });

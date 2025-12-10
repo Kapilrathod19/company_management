@@ -119,6 +119,14 @@
                         </a>
                     </li>
                 @endif
+                @if (isset($permissions['calibration']) && $permissions['calibration']->view == 1)
+                    <li class="{{ Request::routeIs('calibration.*') ? 'active' : '' }} sidebar-layout">
+                        <a href="{{ route('calibration.index') }}" class="svg-icon">
+                            <i class="bi bi-speedometer2"></i>
+                            <span class="ml-2">Calibration</span>
+                        </a>
+                    </li>
+                @endif
 
             </ul>
         </nav>
