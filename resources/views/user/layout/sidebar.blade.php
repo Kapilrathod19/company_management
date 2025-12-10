@@ -1,6 +1,8 @@
 @php
     $setting = App\Models\Setting::first();
-    $permissions = App\Models\Permission::where('user_id', auth()->id())->get()->keyBy('module');
+    $permissions = App\Models\Permission::where('user_id', auth()->id())
+        ->get()
+        ->keyBy('module');
 @endphp
 <div class="iq-sidebar  sidebar-default">
     <div class="iq-sidebar-logo d-flex align-items-end justify-content-between">
@@ -62,7 +64,7 @@
                     </li>
                 @endif
                 @if (isset($permissions['employee_master']) && $permissions['employee_master']->view == 1)
-                    <li class="@if (str_contains(Request::url(), '/employee')) active @endif sidebar-layout">
+                    <li class="{{ Request::routeIs('employee.*') ? 'active' : '' }} sidebar-layout">
                         <a href="{{ route('employee.index') }}" class="svg-icon">
                             <i class="bi bi-people"></i>
                             <span class="ml-2">Employee Master</span>
@@ -106,6 +108,14 @@
                         <a href="{{ route('production.index') }}" class="svg-icon">
                             <i class="bi bi-gear-wide-connected"></i>
                             <span class="ml-2">Production</span>
+                        </a>
+                    </li>
+                @endif
+                @if (isset($permissions['employee_work']) && $permissions['employee_work']->view == 1)
+                    <li class="{{ Request::routeIs('employee_work.*') ? 'active' : '' }} sidebar-layout">
+                        <a href="{{ route('employee_work.index') }}" class="svg-icon">
+                            <i class="bi bi-briefcase"></i>
+                            <span class="ml-2">Employee Work</span>
                         </a>
                     </li>
                 @endif

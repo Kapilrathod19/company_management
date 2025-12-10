@@ -7,6 +7,7 @@ use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeWorkController;
 use App\Http\Controllers\GrnController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MachineController;
@@ -194,5 +195,13 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/get-component-details/{id}', [ProductionController::class, 'getComponentDetails'])
     ->name('get.component.details');
 
+    Route::prefix('employee_work')->group(function () {
+        Route::get('/', [EmployeeWorkController::class, 'index'])->name('employee_work.index')->middleware('permission:employee_work,view');
+        Route::get('create', [EmployeeWorkController::class, 'create'])->name('employee_work.create')->middleware('permission:employee_work,add');
+        Route::post('/store', [EmployeeWorkController::class, 'store'])->name('employee_work.store')->middleware('permission:employee_work,add');
+        Route::get('/edit/{id}', [EmployeeWorkController::class, 'edit'])->name('employee_work.edit')->middleware('permission:employee_work,edit');
+        Route::put('/update/{id}', [EmployeeWorkController::class, 'update'])->name('employee_work.update')->middleware('permission:employee_work,edit');
+        Route::get('/destroy/{id}', [EmployeeWorkController::class, 'destroy'])->name('employee_work.destroy')->middleware('permission:employee_work,delete');
+    });
 
 });
