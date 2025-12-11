@@ -19,7 +19,7 @@ class SalesOrderController extends Controller
 
     public function create()
     {
-        $party_names = Party::where('user_id', auth()->id())->where('category', 'Customer')->get();
+        $party_names = Party::where('user_id', auth()->id())->where('category', 'Customer')->where('status',1)->get();
         $items = Item::where('user_id', auth()->id())->has('processes')->get();
         return view('user.sales_orders.add_salesorders', compact('party_names', 'items'));
     }
@@ -83,7 +83,7 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
 
         $party_names = Party::where('user_id', auth()->id())
-            ->where('category', 'Customer')
+            ->where('category', 'Customer')->where('status',1)
             ->get();
 
         $items = Item::where('user_id', auth()->id())

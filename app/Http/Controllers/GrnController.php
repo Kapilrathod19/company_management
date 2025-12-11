@@ -233,33 +233,33 @@ class GrnController extends Controller
 
             $partyIds = SalesOrder::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('customer_name')->unique()->toArray();
 
-            $parties = Party::whereIn('id', $partyIds)->get();
+            $parties = Party::whereIn('id', $partyIds)->where('status',1)->get();
 
             return response()->json(['status' => true, 'data' => $parties]);
         }
 
         if ($category == "Supplier") {
 
-            $supplierParties = Party::where('user_id', $userId)->where('category', 'Supplier')->pluck('id')->toArray();
+            $supplierParties = Party::where('user_id', $userId)->where('category', 'Supplier')->where('status',1)->pluck('id')->toArray();
 
             $supplierTablePartyIds = Supplier::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('supplier_name')->unique()->toArray();
 
             $finalIds = array_intersect($supplierParties, $supplierTablePartyIds);
 
-            $parties = Party::whereIn('id', $finalIds)->get();
+            $parties = Party::whereIn('id', $finalIds)->where('status',1)->get();
 
             return response()->json(['status' => true, 'data' => $parties]);
         }
 
         if ($category == "Jobwork") {
 
-            $jobworkParties = Party::where('user_id', $userId)->where('category', 'Jobwork')->pluck('id')->toArray();
+            $jobworkParties = Party::where('user_id', $userId)->where('category', 'Jobwork')->where('status',1)->pluck('id')->toArray();
 
             $supplierTablePartyIds = Supplier::where('user_id', $userId)->where('remain_qty', '>', 0)->pluck('supplier_name')->unique()->toArray();
 
             $finalIds = array_intersect($jobworkParties, $supplierTablePartyIds);
 
-            $parties = Party::whereIn('id', $finalIds)->get();
+            $parties = Party::whereIn('id', $finalIds)->where('status',1)->get();
 
             return response()->json(['status' => true, 'data' => $parties]);
         }
