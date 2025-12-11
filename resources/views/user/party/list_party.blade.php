@@ -31,6 +31,7 @@
                                             <th>Mobile</th>
                                             <th>GST Number</th>
                                             <th>Address</th>
+                                            <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -44,6 +45,13 @@
                                                 <td>{{ $item->mobile_number ?? '' }}</td>
                                                 <td>{{ $item->gst_number ?? '' }}</td>
                                                 <td>{{ $item->address ?? '' }}</td>
+                                                <td>
+                                                    @if ($item->status == '1')
+                                                        <span class="badge bg-success">Active</span>
+                                                    @else
+                                                        <span class="badge bg-danger">Inactive</span>
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     @if (isset($permissions['party_master']) && $permissions['party_master']->edit == 1)
                                                         <a class="btn btn-primary btn-sm mb-2"

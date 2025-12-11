@@ -42,6 +42,7 @@ class PartyController extends Controller
             'mobile_number' => $request->mobile_number,
             'gst_number' => $request->gst_number,
             'address' => $request->address,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('party.index')->with('success', 'Party created successfully.');
@@ -75,6 +76,7 @@ class PartyController extends Controller
             'mobile_number' => $request->mobile_number,
             'gst_number' => $request->gst_number,
             'address' => $request->address,
+            'status' => $request->status,
         ]);
 
         return redirect()->route('party.index')->with('success', 'Party updated successfully.');

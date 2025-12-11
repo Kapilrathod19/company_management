@@ -79,6 +79,19 @@
                                         <span class="text-danger"></span>
                                     </div>
 
+                                    <div class="col-md-6 mb-3">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select name="status" id="status" class="form-control">
+                                            <option value="1"
+                                                {{ old('status', $party->status) == '1' ? 'selected' : '' }}>Active
+                                            </option>
+                                            <option value="0"
+                                                {{ old('status', $party->status) == '0' ? 'selected' : '' }}>
+                                                Inactive</option>
+                                        </select>
+                                        <span class="text-danger"></span>
+                                    </div>
+
                                     <div class="col-md-12 mb-3">
                                         <label for="address" class="form-label">Address</label>
                                         <textarea name="address" id="address" rows="2" class="form-control">{{ old('address', $party->address) }}</textarea>
