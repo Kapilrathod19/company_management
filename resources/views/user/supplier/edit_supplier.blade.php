@@ -90,6 +90,20 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label class="form-label">Component Number</label>
+                                        <select name="part_no" id="part_no" class="form-control">
+                                            <option value="">Select Component Number</option>
+                                            @foreach ($items as $item)
+                                                <option value="{{ $item->id }}"
+                                                    {{ $supplier->part_no == $item->id ? 'selected' : '' }}>
+                                                    {{ $item->part_number }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Unit No</label>
                                         <select name="unit_no" id="unit_no" class="form-control">
                                             <option value="">Select Unit No</option>
@@ -108,20 +122,6 @@
                                         <label class="form-label">Sales PO No</label>
                                         <input type="text" name="sales_po_no" id="sales_po_no" class="form-control"
                                             value="{{ $supplier->sales_po_no }}">
-                                        <span class="text-danger"></span>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Component Number</label>
-                                        <select name="part_no" id="part_no" class="form-control">
-                                            <option value="">Select Component Number</option>
-                                            @foreach ($items as $item)
-                                                <option value="{{ $item->id }}"
-                                                    {{ $supplier->part_no == $item->id ? 'selected' : '' }}>
-                                                    {{ $item->part_number }}
-                                                </option>
-                                            @endforeach
-                                        </select>
                                         <span class="text-danger"></span>
                                     </div>
 
