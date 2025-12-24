@@ -31,8 +31,8 @@
                                             <th>PO No</th>
                                             <th>Party Challan No</th>
                                             <th>Party Challan Date</th>
-                                            <th>Unit No</th>
                                             <th>Component No</th>
+                                            <th>Unit No</th>
                                             <th>Description</th>
                                             <th>Qty</th>
                                             <th>Weight</th>
@@ -54,8 +54,8 @@
                                                 <td class="text-nowrap">
                                                     {{ date('d-m-Y', strtotime($item->party_challan_date)) }}
                                                 </td>
-                                                <td>{{ $item->unit_no }}</td>
                                                 <td>{{ $item->part_no }}</td>
+                                                <td>{{ $item->unit_no }}</td>
                                                 <td>{{ $item->description }}</td>
                                                 <td>{{ $item->qty }}</td>
                                                 <td>{{ $item->weight }}</td>

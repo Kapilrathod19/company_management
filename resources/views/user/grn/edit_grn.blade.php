@@ -92,19 +92,19 @@
                                     <input type="date" name="party_challan_date" id="party_challan_date" class="form-control" value="{{ old('party_challan_date', $grn->party_challan_date) }}">
                                     <span class="text-danger"></span>
                                 </div>
-
+                                
                                 <div class="col-md-6 mb-3">
-                                    <label for="unit_no" class="form-label">Unit No</label>
-                                    <select name="unit_no" id="unit_no" class="form-control">
-                                        <option value="">Select Unit No</option>
+                                    <label for="part_no" class="form-label">Component No</label>
+                                    <select name="part_no" id="part_no" class="form-control">
+                                        <option value="">Select Component No</option>
                                     </select>
                                     <span class="text-danger"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="part_no" class="form-label">Component No</label>
-                                    <select name="part_no" id="part_no" class="form-control">
-                                        <option value="">Select Component No</option>
+                                    <label for="unit_no" class="form-label">Unit No</label>
+                                    <select name="unit_no" id="unit_no" class="form-control">
+                                        <option value="">Select Unit No</option>
                                     </select>
                                     <span class="text-danger"></span>
                                 </div>
