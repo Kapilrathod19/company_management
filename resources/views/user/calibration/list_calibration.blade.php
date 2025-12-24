@@ -28,7 +28,7 @@
                                             <th>Date</th>
                                             <th>Machine Name</th>
                                             <th>Machine No</th>
-                                            <th>Calibration Date</th>
+                                            <th>Calibration Due Date</th>
                                             <th>Certificate</th>
                                             <th>Action</th>
                                         </tr>
