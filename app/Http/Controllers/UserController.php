@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\CompanyUser;
+use App\Models\Grn;
+use App\Models\Item;
+use App\Models\Production;
+use App\Models\SalesOrder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +16,70 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('user.dashboard');
+        $items = Item::where('category', 'Finished Item')->where('user_id', auth()->id())->get();
+        return view('user.dashboard', compact('items'));
+    }
+
+    public function getUnitNumbers($itemId)
+    {
+        $units = SalesOrder::where('part_no', $itemId)->pluck('unit_no');
+
+        return response()->json($units);
+    }
+
+    public function getSalesOrderByUnit(Request $request)
+    {
+        $request->validate([
+            'unit_no' => 'required|string'
+        ]);
+
+        $unitNo = trim($request->unit_no);
+
+        $salesOrders = SalesOrder::where('unit_no', $unitNo)
+            ->select('id', 'unit_no', 'po_no', 'po_date')
+            ->get();
+
+        $grn = Grn::where('unit_no', $unitNo)
+            ->select('party_challan_no', 'party_challan_date')
+            ->first();
+
+        $production = null;
+
+        if ($salesOrders->isNotEmpty()) {
+            $salesOrderIds = $salesOrders->pluck('id');
+
+            $production = Production::with('processDetails')
+                ->whereIn('unit_no', $salesOrderIds)
+                ->latest('id')
+                ->first();
+        }
+
+        return response()->json([
+            'sales_orders' => $salesOrders->map(function ($order) {
+                return [
+                    'unit_no' => $order->unit_no,
+                    'po_no'   => $order->po_no,
+                    'po_date' => $order->po_date
+                        ? Carbon::parse($order->po_date)->format('d-m-Y')
+                        : null,
+                ];
+            }),
+            'grn' => $grn ? [
+                'party_challan_no'   => $grn->party_challan_no,
+                'party_challan_date' => $grn->party_challan_date
+                    ? Carbon::parse($grn->party_challan_date)->format('d-m-Y')
+                    : null,
+            ] : null,
+            'production' => $production ? [
+                'process' =>
+                optional($production->processDetails)->process_number
+                    . ' - ' .
+                    optional($production->processDetails)->process_name,
+                'date' => $production->date
+                    ? Carbon::parse($production->date)->format('d-m-Y')
+                    : null,
+            ] : null
+        ]);
     }
 
     public function profile()

@@ -79,6 +79,8 @@ Route::middleware(['auth', 'checkRole:admin'])->group(function () {
 Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
 
     Route::get('dashboard', [UserController::class, 'index'])->name('user.dashboard');
+    Route::get('/get-unit-numbers/{item}', [UserController::class, 'getUnitNumbers'])->name('get.unit.numbers');
+    Route::get('/user/get-sales-order', [UserController::class, 'getSalesOrderByUnit'])->name('get.sales.order');
 
     Route::prefix('user_profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
@@ -183,7 +185,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/grn/get-po-items', [GrnController::class, 'getPoItems'])->name('grn.getPoItems');
     Route::get('/grn/get-item-by-unit', [GrnController::class, 'getItemByUnit'])->name('grn.getItemByUnit');
     Route::get('/grn/get-item-by-part', [GrnController::class, 'getItemByPart'])->name('grn.getItemByPart');
-    
+
     Route::prefix('production')->group(function () {
         Route::get('/', [ProductionController::class, 'index'])->name('production.index')->middleware('permission:production,view');
         Route::get('create', [ProductionController::class, 'create'])->name('production.create')->middleware('permission:production,add');
@@ -194,7 +196,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     });
     Route::get('/get-components/{id}', [ProductionController::class, 'getComponents'])->name('get.components');
     Route::get('/get-component-details/{id}', [ProductionController::class, 'getComponentDetails'])
-    ->name('get.component.details');
+        ->name('get.component.details');
 
     Route::prefix('employee_work')->group(function () {
         Route::get('/', [EmployeeWorkController::class, 'index'])->name('employee_work.index')->middleware('permission:employee_work,view');
@@ -204,7 +206,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [EmployeeWorkController::class, 'update'])->name('employee_work.update')->middleware('permission:employee_work,edit');
         Route::get('/destroy/{id}', [EmployeeWorkController::class, 'destroy'])->name('employee_work.destroy')->middleware('permission:employee_work,delete');
     });
-    
+
     Route::prefix('calibration')->group(function () {
         Route::get('/', [CalibrationController::class, 'index'])->name('calibration.index')->middleware('permission:calibration,view');
         Route::get('create', [CalibrationController::class, 'create'])->name('calibration.create')->middleware('permission:calibration,add');
@@ -214,5 +216,4 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/destroy/{id}', [CalibrationController::class, 'destroy'])->name('calibration.destroy')->middleware('permission:calibration,delete');
     });
     Route::get('/machine/details/{id}', [CalibrationController::class, 'getMachineDetails'])->name('machine.details');
-
 });
