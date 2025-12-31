@@ -7,6 +7,7 @@ use App\Models\Grn;
 use App\Models\Item;
 use App\Models\Production;
 use App\Models\SalesOrder;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,66 +21,51 @@ class UserController extends Controller
         return view('user.dashboard', compact('items'));
     }
 
-    public function getUnitNumbers($itemId)
+    public function getSalesOrdersByItem($itemId)
     {
-        $units = SalesOrder::where('part_no', $itemId)->pluck('unit_no');
-
-        return response()->json($units);
-    }
-
-    public function getSalesOrderByUnit(Request $request)
-    {
-        $request->validate([
-            'unit_no' => 'required|string'
-        ]);
-
-        $unitNo = trim($request->unit_no);
-
-        $salesOrders = SalesOrder::where('unit_no', $unitNo)
+        $salesOrders = SalesOrder::where('part_no', $itemId)
             ->select('id', 'unit_no', 'po_no', 'po_date')
             ->get();
 
-        $grn = Grn::where('unit_no', $unitNo)
-            ->select('party_challan_no', 'party_challan_date')
-            ->first();
+        $supplier = Supplier::where('part_no', $itemId)
+            ->latest('id')->first();
 
-        $production = null;
+        $supplierPoDate = $supplier && $supplier->po_date
+            ? Carbon::parse($supplier->po_date)->format('d-m-Y')
+            : '-';
 
-        if ($salesOrders->isNotEmpty()) {
-            $salesOrderIds = $salesOrders->pluck('id');
+        $rows = [];
+
+        foreach ($salesOrders as $order) {
+
+            $grn = Grn::where('unit_no', $order->unit_no)->first();
 
             $production = Production::with('processDetails')
-                ->whereIn('unit_no', $salesOrderIds)
+                ->where('unit_no', $order->id)
                 ->latest('id')
                 ->first();
+
+            $rows[] = [
+                'unit_no' => $order->unit_no,
+                'po_no'   => $order->po_no,
+                'po_date' => $order->po_date
+                    ? Carbon::parse($order->po_date)->format('d-m-Y')
+                    : '-',
+                'supplier_po_date' => $supplierPoDate,
+                'party_challan_no' => $grn->party_challan_no ?? '-',
+                'party_challan_date' => isset($grn->party_challan_date)
+                    ? Carbon::parse($grn->party_challan_date)->format('d-m-Y')
+                    : '-',
+                'production_date' => isset($production->date)
+                    ? Carbon::parse($production->date)->format('d-m-Y')
+                    : '-',
+                'process' => $production && $production->processDetails
+                    ? $production->processDetails->process_number . ' - ' . $production->processDetails->process_name
+                    : '-',
+            ];
         }
 
-        return response()->json([
-            'sales_orders' => $salesOrders->map(function ($order) {
-                return [
-                    'unit_no' => $order->unit_no,
-                    'po_no'   => $order->po_no,
-                    'po_date' => $order->po_date
-                        ? Carbon::parse($order->po_date)->format('d-m-Y')
-                        : null,
-                ];
-            }),
-            'grn' => $grn ? [
-                'party_challan_no'   => $grn->party_challan_no,
-                'party_challan_date' => $grn->party_challan_date
-                    ? Carbon::parse($grn->party_challan_date)->format('d-m-Y')
-                    : null,
-            ] : null,
-            'production' => $production ? [
-                'process' =>
-                optional($production->processDetails)->process_number
-                    . ' - ' .
-                    optional($production->processDetails)->process_name,
-                'date' => $production->date
-                    ? Carbon::parse($production->date)->format('d-m-Y')
-                    : null,
-            ] : null
-        ]);
+        return response()->json($rows);
     }
 
     public function profile()

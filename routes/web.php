@@ -79,8 +79,8 @@ Route::middleware(['auth', 'checkRole:admin'])->group(function () {
 Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
 
     Route::get('dashboard', [UserController::class, 'index'])->name('user.dashboard');
-    Route::get('/get-unit-numbers/{item}', [UserController::class, 'getUnitNumbers'])->name('get.unit.numbers');
-    Route::get('/user/get-sales-order', [UserController::class, 'getSalesOrderByUnit'])->name('get.sales.order');
+    Route::get('/get-sales-orders-by-item/{item}', [UserController::class, 'getSalesOrdersByItem'])
+    ->name('get.sales.orders.by.item');
 
     Route::prefix('user_profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
