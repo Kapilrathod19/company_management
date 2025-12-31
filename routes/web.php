@@ -7,6 +7,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\CompanyUsersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeWorkController;
 use App\Http\Controllers\GrnController;
@@ -216,4 +217,13 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/destroy/{id}', [CalibrationController::class, 'destroy'])->name('calibration.destroy')->middleware('permission:calibration,delete');
     });
     Route::get('/machine/details/{id}', [CalibrationController::class, 'getMachineDetails'])->name('machine.details');
+
+    Route::prefix('documents')->group(function () {
+        Route::get('/', [DocumentsController::class, 'index'])->name('documents.index')->middleware('permission:documents,view');
+        Route::get('create', [DocumentsController::class, 'create'])->name('documents.create')->middleware('permission:documents,add');
+        Route::post('/store', [DocumentsController::class, 'store'])->name('documents.store')->middleware('permission:documents,add');
+        Route::get('/edit/{id}', [DocumentsController::class, 'edit'])->name('documents.edit')->middleware('permission:documents,edit');
+        Route::put('/update/{id}', [DocumentsController::class, 'update'])->name('documents.update')->middleware('permission:documents,edit');
+        Route::get('/destroy/{id}', [DocumentsController::class, 'destroy'])->name('documents.destroy')->middleware('permission:documents,delete');
+    });
 });

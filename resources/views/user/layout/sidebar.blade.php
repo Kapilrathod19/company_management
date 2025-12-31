@@ -127,6 +127,14 @@
                         </a>
                     </li>
                 @endif
+                @if (isset($permissions['documents']) && $permissions['documents']->view == 1)
+                    <li class="@if (str_contains(Request::url(), '/document')) active @endif sidebar-layout">
+                        <a href="{{ route('documents.index') }}" class="svg-icon">
+                            <i class="bi bi-folder2-open"></i>
+                            <span class="ml-2">Upload Documents</span>
+                        </a>
+                    </li>
+                @endif
 
             </ul>
         </nav>
