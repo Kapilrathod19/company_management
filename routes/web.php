@@ -82,6 +82,7 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/get-sales-orders-by-item/{item}', [UserController::class, 'getSalesOrdersByItem'])
     ->name('get.sales.orders.by.item');
+    Route::get('/production/all-processes/{salesOrderId}',[UserController::class, 'getAllProcessesBySalesOrder'])->name('production.all.processes');
 
     Route::prefix('user_profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');

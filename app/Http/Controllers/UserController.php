@@ -23,15 +23,19 @@ class UserController extends Controller
 
     public function getSalesOrdersByItem($itemId)
     {
-        $salesOrders = SalesOrder::where('part_no', $itemId)
-            ->select('id', 'unit_no', 'po_no', 'po_date')
+        $salesOrders = SalesOrder::with('party')
+            ->where('part_no', $itemId)
+            ->select('id','customer_name', 'unit_no', 'po_no', 'po_date')
             ->get();
 
-        $supplier = Supplier::where('part_no', $itemId)
-            ->latest('id')->first();
+        $supplier = Supplier::where('part_no', $itemId)->latest('id')->first();
 
         $supplierPoDate = $supplier && $supplier->po_date
             ? Carbon::parse($supplier->po_date)->format('d-m-Y')
+            : '-';
+        
+        $supplierPoNo = $supplier && $supplier->po_no
+            ? $supplier->po_no
             : '-';
 
         $rows = [];
@@ -40,32 +44,60 @@ class UserController extends Controller
 
             $grn = Grn::where('unit_no', $order->unit_no)->first();
 
-            $production = Production::with('processDetails')
+            $lastProduction = Production::with('processDetails')
                 ->where('unit_no', $order->id)
                 ->latest('id')
                 ->first();
 
             $rows[] = [
+                'sales_order_id' => $order->id,
+                'customer_name' => $order->party->name ?? '-',
                 'unit_no' => $order->unit_no,
-                'po_no'   => $order->po_no,
+                'po_no' => $order->po_no,
                 'po_date' => $order->po_date
                     ? Carbon::parse($order->po_date)->format('d-m-Y')
                     : '-',
+                'supplier_po_no' => $supplierPoNo,
                 'supplier_po_date' => $supplierPoDate,
                 'party_challan_no' => $grn->party_challan_no ?? '-',
                 'party_challan_date' => isset($grn->party_challan_date)
                     ? Carbon::parse($grn->party_challan_date)->format('d-m-Y')
                     : '-',
-                'production_date' => isset($production->date)
-                    ? Carbon::parse($production->date)->format('d-m-Y')
+                'production_date' => isset($lastProduction->date)
+                    ? Carbon::parse($lastProduction->date)->format('d-m-Y')
                     : '-',
-                'process' => $production && $production->processDetails
-                    ? $production->processDetails->process_number . ' - ' . $production->processDetails->process_name
+                'process' => $lastProduction && $lastProduction->processDetails
+                    ? $lastProduction->processDetails->process_number . ' - ' . $lastProduction->processDetails->process_name
                     : '-',
+                'has_process' => $lastProduction ? true : false
             ];
         }
 
         return response()->json($rows);
+    }
+
+    public function getAllProcessesBySalesOrder($salesOrderId)
+    {
+        $productions = Production::with('employee', 'processDetails')
+            ->where('unit_no', $salesOrderId)
+            ->orderBy('id')
+            ->get();
+
+        $data = $productions->map(function ($item) {
+            return [
+                'employee' => $item->employee ? ($item->employee->emp_no ?? '-') . ' - ' . ($item->employee->employee_name ?? '-') : '-',
+                'qty' => $item->qty ?? '-',
+                'weight' => $item->weight ?? '-',
+                'process_date' => isset($item->date)
+                    ? Carbon::parse($item->date)->format('d-m-Y')
+                    : '-',
+                'process' => $item->processDetails
+                    ? $item->processDetails->process_number . ' - ' . $item->processDetails->process_name
+                    : '-',
+            ];
+        });
+
+        return response()->json($data);
     }
 
     public function profile()

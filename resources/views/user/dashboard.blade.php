@@ -2,29 +2,50 @@
 @section('title', 'User | Dashboard')
 
 @section('content')
+    <style>
+        /* Compact table */
+        .production-table-wrapper table {
+            font-size: 10px;
+            table-layout: auto;
+        }
+
+        .production-table-wrapper th,
+        .production-table-wrapper td {
+            padding: 4px 6px !important;
+            /* reduce cell space */
+            line-height: 1.2;
+            vertical-align: middle;
+        }
+
+        .production-table-wrapper th {
+            background: #f8f9fa;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .production-table-wrapper td {
+            white-space: nowrap;
+            /* keeps data in single line */
+        }
+
+        /* Reduce button size inside table */
+        .production-table-wrapper .btn {
+            padding: 2px 6px;
+            font-size: 10px;
+            line-height: 1;
+        }
+    </style>
+
+
     <div class="content-page">
         <div class="container-fluid">
 
-            {{-- Welcome Section --}}
-            {{-- <div class="row mb-4">
-                <div class="col-12">
-                    <div class="bg-white rounded shadow-sm p-4">
-                        <h2 class="mb-0">
-                            Welcome Back,
-                            <span class="text-primary">
-                                {{ Auth::user()->name ?? 'Guest' }}
-                            </span>
-                        </h2>
-                    </div>
-                </div>
-            </div> --}}
-
-            {{-- Search Section --}}
             <div class="row">
                 <div class="col-12">
+
                     <div class="bg-white rounded shadow-sm p-4">
-                        <div class="row g-3">
-                            {{-- Component Number --}}
+
+                        <div class="row g-3 mb-4">
                             <div class="col-lg-4 col-md-4 col-sm-12">
                                 <label class="fw-semibold mb-1">
                                     Component No
@@ -40,34 +61,68 @@
                             </div>
                         </div>
 
-                    </div>
-                </div>
-
-                {{-- Result Table --}}
-                <div class="col-12">
-                    <div class="bg-white rounded shadow-sm p-4">
-                        <table id="tabledata" class="table table-striped table-bordered w-100">
-                            <thead>
-                                <tr>
-                                    <th>Unit No</th>
-                                    <th>PO No</th>
-                                    <th class="text-nowrap">PO Date</th>
-                                    <th class="text-nowrap">SupplierPO Date</th>
-                                    <th>ChNo</th>
-                                    <th class="text-nowrap">Ch Date</th>
-                                    <th class="text-nowrap">Prod Date</th>
-                                    <th>Last Process</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12">
+                                <div class="table-responsive production-table-wrapper">
+                                    <table id="tabledata" class="table table-striped table-bordered w-100">
+                                        <thead>
+                                            <tr>
+                                                <th>Unit No</th>
+                                                <th>Customer</th>
+                                                <th>PO No</th>
+                                                <th class="text-nowrap">PO Date</th>
+                                                <th>SupPO No</th>
+                                                <th class="text-nowrap">SupPO Date</th>
+                                                <th>ChNo</th>
+                                                <th class="text-nowrap">Ch Date</th>
+                                                <th class="text-nowrap">Prod Date</th>
+                                                <th>Last Process</th>
+                                                <th>All Process</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
+
+    {{-- Modal --}}
+    <div class="modal fade" id="allProcessModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="allProcessTitle"></h5>
+                    <button class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Employee Name</th>
+                                <th>Qty</th>
+                                <th>Weight</th>
+                                <th>Process Date</th>
+                                <th>Process</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allProcessBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
+
 @section('scripts')
     <script>
         $(document).ready(function() {
@@ -105,17 +160,26 @@
 
                         $.each(data, function(index, row) {
                             tbody.append(`
-                        <tr>
-                            <td>${row.unit_no ?? '-'}</td>
-                            <td>${row.po_no ?? '-'}</td>
-                            <td class="text-nowrap">${row.po_date ?? '-'}</td>
-                            <td class="text-nowrap">${row.supplier_po_date ?? '-'}</td>
-                            <td>${row.party_challan_no ?? '-'}</td>
-                            <td class="text-nowrap">${row.party_challan_date ?? '-'}</td>
-                            <td class="text-nowrap">${row.production_date ?? '-'}</td>
-                            <td>${row.process ?? '-'}</td>
-                        </tr>
-                    `);
+                                <tr>
+                                    <td>${row.unit_no}</td>
+                                    <td>${row.customer_name}</td>
+                                    <td>${row.po_no}</td>
+                                    <td class="text-nowrap">${row.po_date}</td>
+                                    <td>${row.supplier_po_no}</td>
+                                    <td class="text-nowrap">${row.supplier_po_date}</td>
+                                    <td>${row.party_challan_no}</td>
+                                    <td class="text-nowrap">${row.party_challan_date}</td>
+                                    <td class="text-nowrap">${row.production_date}</td>
+                                    <td>${row.process}</td>
+                                    <td>
+                                        ${row.has_process ? `
+                                                            <button class="btn btn-sm btn-primary"
+                                                                onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
+                                                                View All
+                                                            </button>` : '-'}
+                                    </td>
+                                </tr>
+                            `);
                         });
                     },
                     error: function() {
@@ -125,5 +189,44 @@
             });
 
         });
+
+        function viewAllProcesses(salesOrderId, unitNo) {
+
+            $('#allProcessTitle').html(
+                `All Processes for Unit: <strong>${unitNo}</strong>`
+            );
+
+            $('#allProcessBody').html(`
+                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+            `);
+
+            $('#allProcessModal').modal('show');
+
+            $.get(
+                '{{ route('production.all.processes', ':id') }}'.replace(':id', salesOrderId),
+                function(data) {
+
+                    let rows = '';
+
+                    if (data.length === 0) {
+                        rows = `<tr><td colspan="6" class="text-center">No process found</td></tr>`;
+                    } else {
+                        $.each(data, function(i, row) {
+                            rows += `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${row.employee}</td>
+                        <td>${row.qty}</td>
+                        <td>${row.weight}</td>
+                        <td>${row.process_date}</td>
+                        <td>${row.process}</td>
+                    </tr>`;
+                        });
+                    }
+
+                    $('#allProcessBody').html(rows);
+                }
+            );
+        }
     </script>
 @endsection
