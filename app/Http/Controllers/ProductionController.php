@@ -69,7 +69,7 @@ class ProductionController extends Controller
         $production->date          = $request->date;
         $production->employee_name   = $request->employee_id;
         $production->unit_no = $request->unit_no;
-        $production->component_no  = $request->component_no;
+        $production->component_no  = $salesorder->item->part_number;
         $production->process    = $request->process;
         $production->qty           = $request->qty;
         $production->weight        = $request->weight;
@@ -122,12 +122,15 @@ class ProductionController extends Controller
         ]);
 
         $production = Production::where('user_id', auth()->id())->findOrFail($id);
+        $salesorder = SalesOrder::where('user_id', auth()->id())
+            ->with('item')
+            ->findOrFail($request->unit_no);
 
         $production->sr_no         = $request->sr_no;
         $production->date          = $request->date;
         $production->employee_name = $request->employee_id;
         $production->unit_no       = $request->unit_no;
-        $production->component_no  = $request->component_no;
+        $production->component_no  = $salesorder->item->part_number;
         $production->process       = $request->process;
         $production->qty           = $request->qty;
         $production->weight        = $request->weight;
@@ -149,10 +152,21 @@ class ProductionController extends Controller
 
     public function getComponents($id)
     {
-        $salesorder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
+        $salesOrder = SalesOrder::where('user_id', auth()->id())
+            ->findOrFail($id);
+        $components = SalesOrder::where('user_id', auth()->id())
+            ->where('unit_no', $salesOrder->unit_no)
+            ->with('item')
+            ->get()
+            ->map(function ($so) {
+                return [
+                    'id' => $so->id,
+                    'component_no' => $so->item->part_number,
+                ];
+            });
 
         return response()->json([
-            'component_no' => $salesorder->item->part_number,
+            'components' => $components
         ]);
     }
 

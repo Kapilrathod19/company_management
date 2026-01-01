@@ -95,9 +95,9 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Component No</label>
                                         <select id="component_no" name="component_no" class="form-control">
-                                            <option value="{{ $production->component_no }}">
-                                                {{ $production->component_no }}</option>
+                                            <option value="">Select Component No</option>
                                         </select>
+
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -168,78 +168,111 @@
 @endsection
 
 @section('scripts')
-    <script>
-        function resetDependentFields() {
-            $("#component_no").html('<option value="">Select Component No</option>');
-            $("#process").html('<option value="">Select Process</option>');
-            $("#qty").val('');
-            $("#weight").val('');
-            $("#total_weight").val('');
-            $("#description").val('');
+<script>
+$(document).ready(function () {
+
+    let selectedUnit     = "{{ $production->unit_no }}";
+    let selectedComponent= "{{ $production->salesOrder->id }}";
+    let selectedProcess  = "{{ $production->process }}";
+
+    function resetDependentFields() {
+        $('#component_no').html('<option value="">Select Component No</option>');
+        $('#process').html('<option value="">Select Process</option>');
+        $('#qty, #weight, #total_weight').val('');
+        $('#description').val('');
+    }
+
+    function calculateTotalWeight() {
+        let qty = parseFloat($('#qty').val()) || 0;
+        let weight = parseFloat($('#weight').val()) || 0;
+        $('#total_weight').val((qty * weight).toFixed(2));
+    }
+
+    $('#qty, #weight').on('input', calculateTotalWeight);
+
+    // =========================
+    // LOAD COMPONENTS BY UNIT
+    // =========================
+    function loadComponents(unitId, selectedComp = null) {
+
+        if (!unitId) {
+            resetDependentFields();
+            return;
         }
 
+        $.ajax({
+            url: "{{ route('get.components', ':id') }}".replace(':id', unitId),
+            type: "GET",
+            success: function (data) {
 
-        function calculateTotalWeight() {
-            let qty = parseFloat($('#qty').val()) || 0;
-            let weight = parseFloat($('#weight').val()) || 0;
-            $('#total_weight').val((qty * weight).toFixed(2));
-        }
+                let options = '<option value="">Select Component No</option>';
 
-        $('#qty, #weight').on('input', calculateTotalWeight);
+                data.components.forEach(function (c) {
+                    let selected = selectedComp == c.id ? 'selected' : '';
+                    options += `<option value="${c.id}" ${selected}>${c.component_no}</option>`;
+                });
 
+                $('#component_no').html(options);
 
-        $('#unit_no').change(function() {
-
-            let id = $(this).val();
-
-            if (!id) {
-                resetDependentFields();
-                return;
-            }
-
-            $.ajax({
-                url: "{{ route('get.components', ':id') }}".replace(':id', id),
-                type: "GET",
-                success: function(data) {
-                    $('#component_no').html(
-                        `<option value="">Select Component No</option><option value="${data.component_no}">${data.component_no}</option>`
-                    );
+                if (selectedComp) {
+                    loadComponentDetails(selectedComp);
                 }
-            });
-
-        });
-
-        $('#component_no').change(function() {
-
-            let id = $('#unit_no').val();
-
-            if (!id) {
-                resetDependentFields();
-                return;
             }
-
-            $.ajax({
-                url: "{{ route('get.component.details', ':id') }}".replace(':id', id),
-                type: "GET",
-                success: function(data) {
-
-                    $('#qty').val(data.details.qty);
-                    $('#weight').val(data.details.weight);
-                    $('#total_weight').val(data.details.total_weight);
-                    $('#description').val(data.details.description);
-
-                    $('#process').html('<option value="">Select Process</option>');
-
-                    data.processes.forEach(function(p) {
-                        $('#process').append(
-                            `<option value="${p.id}">${p.process_number} - ${p.process_name}</option>`
-                        );
-                    });
-
-                }
-            });
-
         });
+    }
+
+    // =========================
+    // LOAD COMPONENT DETAILS
+    // =========================
+    function loadComponentDetails(componentId) {
+
+        if (!componentId) return;
+
+        $.ajax({
+            url: "{{ route('get.component.details', ':id') }}".replace(':id', componentId),
+            type: "GET",
+            success: function (data) {
+
+                $('#qty').val(data.details.qty);
+                $('#weight').val(data.details.weight);
+                $('#total_weight').val(data.details.total_weight);
+                $('#description').val(data.details.description);
+
+                let processOptions = '<option value="">Select Process</option>';
+
+                data.processes.forEach(function (p) {
+                    let selected = selectedProcess == p.id ? 'selected' : '';
+                    processOptions += `
+                        <option value="${p.id}" ${selected}>
+                            ${p.process_number} - ${p.process_name}
+                        </option>`;
+                });
+
+                $('#process').html(processOptions);
+            }
+        });
+    }
+
+    // =========================
+    // EVENTS
+    // =========================
+    $('#unit_no').change(function () {
+        resetDependentFields();
+        loadComponents($(this).val());
+    });
+
+    $('#component_no').change(function () {
+        loadComponentDetails($(this).val());
+    });
+
+    // =========================
+    // INITIAL LOAD (EDIT MODE)
+    // =========================
+    if (selectedUnit) {
+        loadComponents(selectedUnit, selectedComponent);
+    }
+
+});
 
         const fields = [{
                 id: '#sr_no',

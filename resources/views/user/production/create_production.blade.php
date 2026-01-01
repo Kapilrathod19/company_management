@@ -253,15 +253,22 @@
                     url: "{{ route('get.components', ':id') }}".replace(':id', id),
                     type: "GET",
                     success: function(data) {
-                        $('#component_no').html(
-                            `<option value="">Select Component No</option><option value="${data.component_no}">${data.component_no}</option>`
-                        );
+                        let options = `<option value="">Select Component No</option>`;
+
+                        data.components.forEach(function(c) {
+                            options += `<option value="${c.id}">
+                        ${c.component_no}
+                    </option>`;
+                        });
+
+                        $('#component_no').html(options);
                     }
+
                 });
             });
 
             $('#component_no').change(function() {
-                let id = $('#unit_no').val(); // sales_order id
+                let id = $(this).val();
 
                 if (!id) return;
 
