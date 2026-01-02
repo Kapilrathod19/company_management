@@ -46,16 +46,23 @@
                     <div class="bg-white rounded shadow-sm p-4">
 
                         <div class="row g-3 mb-4">
+
                             <div class="col-lg-4 col-md-4 col-sm-12">
-                                <label class="fw-semibold mb-1">
-                                    Component No
-                                </label>
+                                <label class="fw-semibold mb-1">From Date</label>
+                                <input type="date" id="fromDate" class="form-control">
+                            </div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <label class="fw-semibold mb-1">To Date</label>
+                                <input type="date" id="toDate" class="form-control">
+                            </div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-12">
+                                <label class="fw-semibold mb-1">Component No</label>
                                 <select id="ComponentNumberSearch" class="form-control select2">
                                     <option value="">Select Component Number</option>
                                     @foreach ($items as $item)
-                                        <option value="{{ $item->id }}">
-                                            {{ $item->part_number }}
-                                        </option>
+                                        <option value="{{ $item->id }}">{{ $item->part_number }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -133,62 +140,72 @@
                 width: '100%'
             });
 
-            $('#ComponentNumberSearch').on('change', function() {
+            $('#ComponentNumberSearch').on('change', loadSalesOrders);
 
-                let itemId = $(this).val();
-                let tbody = $('#tabledata tbody');
-
-                tbody.empty(); // clear table
-
-                if (!itemId) return;
-
-                $.ajax({
-                    url: '{{ route('get.sales.orders.by.item', ':id') }}'.replace(':id', itemId),
-                    type: 'GET',
-                    success: function(data) {
-
-                        if (data.length === 0) {
-                            tbody.append(`
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">
-                                No records found
-                            </td>
-                        </tr>
-                    `);
-                            return;
-                        }
-
-                        $.each(data, function(index, row) {
-                            tbody.append(`
-                                <tr>
-                                    <td>${row.unit_no}</td>
-                                    <td>${row.customer_name}</td>
-                                    <td>${row.po_no}</td>
-                                    <td class="text-nowrap">${row.po_date}</td>
-                                    <td>${row.supplier_po_no}</td>
-                                    <td class="text-nowrap">${row.supplier_po_date}</td>
-                                    <td>${row.party_challan_no}</td>
-                                    <td class="text-nowrap">${row.party_challan_date}</td>
-                                    <td class="text-nowrap">${row.production_date}</td>
-                                    <td>${row.process}</td>
-                                    <td>
-                                        ${row.has_process ? `
-                                                            <button class="btn btn-sm btn-primary"
-                                                                onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
-                                                                View All
-                                                            </button>` : '-'}
-                                    </td>
-                                </tr>
-                            `);
-                        });
-                    },
-                    error: function() {
-                        console.error('Failed to load sales orders');
-                    }
-                });
-            });
-
+            $('#fromDate, #toDate').on('change', loadSalesOrders);
         });
+
+        function loadSalesOrders() {
+
+            let itemId = $('#ComponentNumberSearch').val();
+            let fromDate = $('#fromDate').val();
+            let toDate = $('#toDate').val();
+            let tbody = $('#tabledata tbody');
+
+            tbody.empty();
+
+            if (!itemId) return;
+
+            $.ajax({
+                url: '{{ route('get.sales.orders.by.item', ':id') }}'.replace(':id', itemId),
+                type: 'GET',
+                data: {
+                    from_date: fromDate,
+                    to_date: toDate
+                },
+                success: function(data) {
+
+                    if (data.length === 0) {
+                        tbody.append(`
+                    <tr>
+                        <td colspan="11" class="text-center text-muted">
+                            No records found
+                        </td>
+                    </tr>
+                `);
+                        return;
+                    }
+
+                    $.each(data, function(index, row) {
+                        tbody.append(`
+                    <tr>
+                        <td>${row.unit_no}</td>
+                        <td>${row.customer_name}</td>
+                        <td>${row.po_no}</td>
+                        <td>${row.po_date}</td>
+                        <td>${row.supplier_po_no}</td>
+                        <td>${row.supplier_po_date}</td>
+                        <td>${row.party_challan_no}</td>
+                        <td>${row.party_challan_date}</td>
+                        <td>${row.production_date}</td>
+                        <td>${row.process}</td>
+                        <td>
+                            ${row.has_process
+                                ? `<button class="btn btn-sm btn-primary"
+                                        onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
+                                        View All
+                                       </button>`
+                                : '-'}
+                        </td>
+                    </tr>
+                `);
+                    });
+                },
+                error: function() {
+                    console.error('Failed to load sales orders');
+                }
+            });
+        }
 
         function viewAllProcesses(salesOrderId, unitNo) {
 

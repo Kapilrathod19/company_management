@@ -21,22 +21,26 @@ class UserController extends Controller
         return view('user.dashboard', compact('items'));
     }
 
-    public function getSalesOrdersByItem($itemId)
+    public function getSalesOrdersByItem(Request $request, $itemId)
     {
-        $salesOrders = SalesOrder::with('party')
-            ->where('part_no', $itemId)
-            ->select('id','customer_name', 'unit_no', 'po_no', 'po_date')
-            ->get();
+        $query = SalesOrder::with('party')->where('part_no', $itemId);
+
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $query->whereBetween('po_date', [
+                Carbon::parse($request->from_date)->startOfDay(),
+                Carbon::parse($request->to_date)->endOfDay()
+            ]);
+        }
+
+        $salesOrders = $query->select('id', 'customer_name', 'unit_no', 'po_no', 'po_date')->get();
 
         $supplier = Supplier::where('part_no', $itemId)->latest('id')->first();
 
         $supplierPoDate = $supplier && $supplier->po_date
             ? Carbon::parse($supplier->po_date)->format('d-m-Y')
             : '-';
-        
-        $supplierPoNo = $supplier && $supplier->po_no
-            ? $supplier->po_no
-            : '-';
+
+        $supplierPoNo = $supplier->po_no ?? '-';
 
         $rows = [];
 
@@ -69,7 +73,7 @@ class UserController extends Controller
                 'process' => $lastProduction && $lastProduction->processDetails
                     ? $lastProduction->processDetails->process_number . ' - ' . $lastProduction->processDetails->process_name
                     : '-',
-                'has_process' => $lastProduction ? true : false
+                'has_process' => (bool) $lastProduction
             ];
         }
 
