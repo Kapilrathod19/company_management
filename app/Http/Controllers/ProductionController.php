@@ -54,13 +54,13 @@ class ProductionController extends Controller
             ->with('item')
             ->findOrFail($request->unit_no);
 
-        $process = Process::where('item_id', $salesorder->part_no)
-            ->where('process_id', $request->process)
-            ->first();
+        // $process = Process::where('item_id', $salesorder->part_no)
+        //     ->where('process_id', $request->process)
+        //     ->first();
 
-        if (!$process) {
-            return back()->with('error', 'Invalid process selected.')->withInput();
-        }
+        // if (!$process) {
+        //     return back()->with('error', 'Invalid process selected.')->withInput();
+        // }
 
         // Save Production
         $production = new Production();
@@ -69,7 +69,7 @@ class ProductionController extends Controller
         $production->date          = $request->date;
         $production->employee_name   = $request->employee_id;
         $production->unit_no = $request->unit_no;
-        $production->component_no  = $salesorder->item->part_number;
+        $production->component_no  = $request->component_no;
         $production->process    = $request->process;
         $production->qty           = $request->qty;
         $production->weight        = $request->weight;
@@ -122,15 +122,12 @@ class ProductionController extends Controller
         ]);
 
         $production = Production::where('user_id', auth()->id())->findOrFail($id);
-        $salesorder = SalesOrder::where('user_id', auth()->id())
-            ->with('item')
-            ->findOrFail($request->unit_no);
 
         $production->sr_no         = $request->sr_no;
         $production->date          = $request->date;
         $production->employee_name = $request->employee_id;
         $production->unit_no       = $request->unit_no;
-        $production->component_no  = $salesorder->item->part_number;
+        $production->component_no  = $request->component_no;
         $production->process       = $request->process;
         $production->qty           = $request->qty;
         $production->weight        = $request->weight;

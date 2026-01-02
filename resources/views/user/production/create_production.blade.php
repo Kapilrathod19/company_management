@@ -256,7 +256,7 @@
                         let options = `<option value="">Select Component No</option>`;
 
                         data.components.forEach(function(c) {
-                            options += `<option value="${c.id}">
+                            options += `<option value="${c.component_no}" data-id="${c.id}">
                         ${c.component_no}
                     </option>`;
                         });
@@ -268,12 +268,12 @@
             });
 
             $('#component_no').change(function() {
-                let id = $(this).val();
+                let componentId = $(this).find(':selected').data('id');
 
-                if (!id) return;
+                if (!componentId) return;
 
                 $.ajax({
-                    url: "{{ route('get.component.details', ':id') }}".replace(':id', id),
+                    url: "{{ route('get.component.details', ':id') }}".replace(':id', componentId),
                     type: "GET",
                     success: function(data) {
 
@@ -286,12 +286,15 @@
 
                         data.processes.forEach(function(p) {
                             $('#process').append(
-                                `<option value="${p.id}">${p.process_number} - ${p.process_name}</option>`
+                                `<option value="${p.id}">
+                        ${p.process_number} - ${p.process_name}
+                    </option>`
                             );
                         });
                     }
                 });
             });
+
 
         });
     </script>
