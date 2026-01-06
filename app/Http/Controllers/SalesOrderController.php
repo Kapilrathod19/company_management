@@ -7,6 +7,7 @@ use App\Models\Party;
 use App\Models\Permission;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SalesOrderController extends Controller
 {
@@ -19,7 +20,7 @@ class SalesOrderController extends Controller
 
     public function create()
     {
-        $party_names = Party::where('user_id', auth()->id())->where('category', 'Customer')->where('status',1)->get();
+        $party_names = Party::where('user_id', auth()->id())->where('category', 'Customer')->where('status', 1)->get();
         $items = Item::where('user_id', auth()->id())->has('processes')->get();
         return view('user.sales_orders.add_salesorders', compact('party_names', 'items'));
     }
@@ -36,9 +37,21 @@ class SalesOrderController extends Controller
             'qty'               => 'required|numeric',
             'weight'            => 'required|numeric|min:0',
             'total_weight'      => 'nullable|numeric|min:0',
-            'unit_no'           => 'required|string|max:255',
-            'delivery_date'     => 'required|date',
-            'drawing_attachment' => 'required',
+            'unit_no' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('sales_orders')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('part_no', $request->part_no)
+                            ->where('user_id', auth()->id());
+                    }),
+            ],
+
+            'delivery_date'      => 'required|date',
+            'drawing_attachment' => 'required|file',
+        ], [
+            'unit_no.unique' => 'This Unit No already exists for the selected Component Number.',
         ]);
 
 
@@ -83,7 +96,7 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
 
         $party_names = Party::where('user_id', auth()->id())
-            ->where('category', 'Customer')->where('status',1)
+            ->where('category', 'Customer')->where('status', 1)
             ->get();
 
         $items = Item::where('user_id', auth()->id())
@@ -106,8 +119,21 @@ class SalesOrderController extends Controller
             'unit'          => 'required|string|max:50',
             'qty'           => 'required|numeric|min:1',
             'weight'        => 'required|numeric|min:0',
-            'unit_no'       => 'required|string|max:255',
+            'unit_no' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('sales_orders')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('part_no', $request->part_no)
+                            ->where('user_id', auth()->id());
+                    })
+                    ->ignore($salesOrder->id),
+            ],
+
             'delivery_date' => 'required|date',
+        ], [
+            'unit_no.unique' => 'This Unit No already exists for the selected Component Number.',
         ]);
 
         $oldQty = $salesOrder->qty;
