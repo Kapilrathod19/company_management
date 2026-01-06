@@ -81,8 +81,8 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
 
     Route::get('dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/get-sales-orders-by-item/{item}', [UserController::class, 'getSalesOrdersByItem'])
-    ->name('get.sales.orders.by.item');
-    Route::get('/production/all-processes/{salesOrderId}',[UserController::class, 'getAllProcessesBySalesOrder'])->name('production.all.processes');
+        ->name('get.sales.orders.by.item');
+    Route::get('/production/all-processes/{salesOrderId}', [UserController::class, 'getAllProcessesBySalesOrder'])->name('production.all.processes');
 
     Route::prefix('user_profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
@@ -199,6 +199,10 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
     Route::get('/get-components/{id}', [ProductionController::class, 'getComponents'])->name('get.components');
     Route::get('/get-component-details/{id}', [ProductionController::class, 'getComponentDetails'])
         ->name('get.component.details');
+    Route::get('/get-units-by-component/{component}',[ProductionController::class, 'getUnitsByComponent'])
+    ->name('get.units.by.component');
+    Route::get('/get-unit-details/{id}',[ProductionController::class, 'getUnitDetails'])
+    ->name('get.unit.details');
 
     Route::prefix('employee_work')->group(function () {
         Route::get('/', [EmployeeWorkController::class, 'index'])->name('employee_work.index')->middleware('permission:employee_work,view');

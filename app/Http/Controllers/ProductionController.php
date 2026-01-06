@@ -20,20 +20,20 @@ class ProductionController extends Controller
 
     public function create()
     {
-        $employees = Employee::where('user_id', auth()->id())->where('status', 'Active')
+        $employees = Employee::where('user_id', auth()->id())
+            ->where('status', 'Active')
             ->latest()
             ->get();
 
         $salesorders = SalesOrder::where('user_id', auth()->id())
-            ->whereIn('id', function ($q) {
-                $q->selectRaw('MAX(id)')
-                    ->from('sales_orders')
-                    ->where('user_id', auth()->id())
-                    ->groupBy('unit_no');
-            })->orderBy('unit_no')->get();
+            ->with('item')
+            ->get();
 
-        return view('user.production.create_production', compact('employees', 'salesorders'));
+        $components = $salesorders->unique('item.part_number')->values();
+
+        return view('user.production.create_production', compact('employees', 'components'));
     }
+
 
     public function store(Request $request)
     {
@@ -90,19 +90,15 @@ class ProductionController extends Controller
             ->latest()
             ->get();
 
-        $salesorders = SalesOrder::where('user_id', auth()->id())
-            ->whereIn('id', function ($q) {
-                $q->selectRaw('MAX(id)')
-                    ->from('sales_orders')
-                    ->where('user_id', auth()->id())
-                    ->groupBy('unit_no');
-            })
-            ->orderBy('unit_no')->get();
+        $components = SalesOrder::with('item')
+            ->where('user_id', auth()->id())
+            ->get()
+            ->unique('item.part_number');
 
         return view('user.production.edit_production', compact(
             'production',
             'employees',
-            'salesorders'
+            'components'
         ));
     }
 
@@ -189,6 +185,49 @@ class ProductionController extends Controller
                 'weight'       => $salesorder->weight,
                 'total_weight' => $salesorder->total_weight,
                 'description'  => $salesorder->description,
+            ],
+            'processes' => $processes
+        ]);
+    }
+
+    public function getUnitsByComponent($componentId)
+    {
+        $salesOrders = SalesOrder::where('user_id', auth()->id())
+            ->whereHas('item', function ($q) use ($componentId) {
+                $q->where('part_number', $componentId);
+            })
+            ->get();
+
+        return response()->json([
+            'units' => $salesOrders->map(function ($so) {
+                return [
+                    'id' => $so->id,
+                    'unit_no' => $so->unit_no
+                ];
+            })
+        ]);
+    }
+
+    public function getUnitDetails($id)
+    {
+        $salesorder = SalesOrder::where('user_id', auth()->id())
+            ->with(['item.processes.processMaster'])
+            ->findOrFail($id);
+
+        $processes = $salesorder->item->processes->map(function ($p) {
+            return [
+                'id' => $p->processMaster->id,
+                'process_number' => $p->processMaster->process_number,
+                'process_name' => $p->processMaster->process_name,
+            ];
+        });
+
+        return response()->json([
+            'details' => [
+                'qty' => $salesorder->qty,
+                'weight' => $salesorder->weight,
+                'total_weight' => $salesorder->total_weight,
+                'description' => $salesorder->description,
             ],
             'processes' => $processes
         ]);

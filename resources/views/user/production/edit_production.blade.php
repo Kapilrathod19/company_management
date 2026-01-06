@@ -17,7 +17,6 @@
 
                     <div class="card">
 
-                        {{-- Alerts --}}
                         @if ($errors->any())
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
@@ -42,7 +41,6 @@
                             </div>
                         @endif
 
-                        {{-- Form --}}
                         <div class="card-body">
                             <form id="myform" action="{{ route('production.update', $production->id) }}" method="POST">
                                 @csrf
@@ -79,13 +77,13 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Unit No</label>
-                                        <select id="unit_no" name="unit_no" class="form-control">
-                                            <option value="">Select Unit No</option>
-                                            @foreach ($salesorders as $order)
-                                                <option value="{{ $order->id }}"
-                                                    {{ $order->id == $production->unit_no ? 'selected' : '' }}>
-                                                    {{ $order->unit_no }}
+                                        <label class="form-label">Component No</label>
+                                        <select id="component_no" name="component_no" class="form-control">
+                                            <option value="">Select Component No</option>
+                                            @foreach ($components as $so)
+                                                <option value="{{ $so->item->part_number }}"
+                                                    {{ $production->component_no == $so->item->part_number ? 'selected' : '' }}>
+                                                    {{ $so->item->part_number }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -93,11 +91,11 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Component No</label>
-                                        <select id="component_no" name="component_no" class="form-control">
-                                            <option value="">Select Component No</option>
+                                        <label class="form-label">Unit No</label>
+                                        <select id="unit_no" name="unit_no" class="form-control">
+                                            <option value="">Select Unit No</option>
+                                            {{-- Options will be loaded by JS based on selected component --}}
                                         </select>
-
                                         <span class="text-danger"></span>
                                     </div>
 
@@ -111,15 +109,7 @@
                                         <label class="form-label">Process</label>
                                         <select id="process" name="process" class="form-control">
                                             <option value="">Select Process</option>
-
-                                            @foreach ($production->salesOrder->item->processes as $p)
-                                                <option value="{{ $p->processMaster->id }}"
-                                                    {{ $production->process == $p->processMaster->id ? 'selected' : '' }}>
-                                                    {{ $p->processMaster->process_number }} -
-                                                    {{ $p->processMaster->process_name }}
-                                                </option>
-                                            @endforeach
-
+                                            {{-- Options loaded dynamically --}}
                                         </select>
                                         <span class="text-danger"></span>
                                     </div>
@@ -155,7 +145,6 @@
                                 </div>
 
                                 <button type="submit" class="btn btn-primary mt-3">Update</button>
-
                             </form>
                         </div>
 
@@ -171,21 +160,9 @@
     <script>
         $(document).ready(function() {
 
-            let selectedUnit        = "{{ $production->unit_no }}";
-let selectedComponentNo = "{{ $production->component_no }}";
-let selectedProcess     = "{{ $production->process }}";
-
-if (selectedUnit) {
-    loadComponents(selectedUnit, selectedComponentNo);
-}
-
-
-            function resetDependentFields() {
-                $('#component_no').html('<option value="">Select Component No</option>');
-                $('#process').html('<option value="">Select Process</option>');
-                $('#qty, #weight, #total_weight').val('');
-                $('#description').val('');
-            }
+            let selectedUnit = "{{ $production->unit_no }}";
+            let selectedComponent = "{{ $production->component_no }}";
+            let selectedProcess = "{{ $production->process }}";
 
             function calculateTotalWeight() {
                 let qty = parseFloat($('#qty').val()) || 0;
@@ -195,160 +172,142 @@ if (selectedUnit) {
 
             $('#qty, #weight').on('input', calculateTotalWeight);
 
-            // =========================
-            // LOAD COMPONENTS BY UNIT
-            // =========================
-            function loadComponents(unitId, selectedComponentNo = null) {
+            function resetDependentFields() {
+                $('#unit_no').html('<option value="">Select Unit No</option>');
+                $('#process').html('<option value="">Select Process</option>');
+                $('#qty, #weight, #total_weight').val('');
+                $('#description').val('');
+            }
 
-                if (!unitId) {
+            // Load units for selected component
+            function loadUnits(componentNo, selectedUnitId = null) {
+                if (!componentNo) {
                     resetDependentFields();
                     return;
                 }
-
                 $.ajax({
-                    url: "{{ route('get.components', ':id') }}".replace(':id', unitId),
+                    url: "{{ route('get.units.by.component', ':component') }}".replace(':component',
+                        componentNo),
                     type: "GET",
                     success: function(data) {
-
-                        let options = '<option value="">Select Component No</option>';
-
-                        data.components.forEach(function(c) {
-                            let selected = selectedComponentNo == c.component_no ? 'selected' :
-                                '';
-                            options += `
-                    <option value="${c.component_no}" data-id="${c.id}" ${selected}>
-                        ${c.component_no}
-                    </option>`;
+                        let options = '<option value="">Select Unit No</option>';
+                        data.units.forEach(u => {
+                            let selected = selectedUnitId == u.id ? 'selected' : '';
+                            options +=
+                                `<option value="${u.id}" ${selected}>${u.unit_no}</option>`;
                         });
+                        $('#unit_no').html(options);
 
-                        $('#component_no').html(options);
-
-                        if (selectedComponentNo) {
-                            let selectedId = $('#component_no option:selected').data('id');
-                            loadComponentDetails(selectedId);
+                        if (selectedUnitId) {
+                            let unitId = $('#unit_no option:selected').val();
+                            loadUnitDetails(unitId);
                         }
                     }
                 });
             }
 
-
-            // =========================
-            // LOAD COMPONENT DETAILS
-            // =========================
-            function loadComponentDetails(componentId) {
-
-                if (!componentId) return;
-
+            // Load unit details and processes
+            function loadUnitDetails(unitId) {
+                if (!unitId) return;
                 $.ajax({
-                    url: "{{ route('get.component.details', ':id') }}".replace(':id', componentId),
+                    url: "{{ route('get.unit.details', ':id') }}".replace(':id', unitId),
                     type: "GET",
                     success: function(data) {
-
                         $('#qty').val(data.details.qty);
                         $('#weight').val(data.details.weight);
                         $('#total_weight').val(data.details.total_weight);
                         $('#description').val(data.details.description);
 
                         let processOptions = '<option value="">Select Process</option>';
-
-                        data.processes.forEach(function(p) {
+                        data.processes.forEach(p => {
                             let selected = selectedProcess == p.id ? 'selected' : '';
-                            processOptions += `
-                        <option value="${p.id}" ${selected}>
-                            ${p.process_number} - ${p.process_name}
-                        </option>`;
+                            processOptions +=
+                                `<option value="${p.id}" ${selected}>${p.process_number} - ${p.process_name}</option>`;
                         });
-
                         $('#process').html(processOptions);
                     }
                 });
             }
 
-            // =========================
-            // EVENTS
-            // =========================
-            $('#unit_no').change(function() {
-                resetDependentFields();
-                loadComponents($(this).val());
-            });
-
+            // Component change → load units
             $('#component_no').change(function() {
-                let componentId = $(this).find(':selected').data('id');
-                if (!componentId) return;
-                loadComponentDetails(componentId);
+                selectedProcess = null;
+                resetDependentFields();
+                loadUnits($(this).val());
             });
 
-            // =========================
-            // INITIAL LOAD (EDIT MODE)
-            // =========================
-            if (selectedUnit) {
-                loadComponents(selectedUnit, selectedComponent);
-            }
-
-        });
-
-        const fields = [{
-                id: '#sr_no',
-                name: 'Sr No'
-            },
-            {
-                id: '#date',
-                name: 'Date'
-            },
-            {
-                id: '#employee_id',
-                name: 'Employee'
-            },
-            {
-                id: '#unit_no',
-                name: 'Unit No'
-            },
-            {
-                id: '#component_no',
-                name: 'Component No'
-            },
-            {
-                id: '#process',
-                name: 'Process'
-            },
-            {
-                id: '#qty',
-                name: 'Quantity'
-            },
-            {
-                id: '#weight',
-                name: 'Weight'
-            },
-            {
-                id: '#total_weight',
-                name: 'Total Weight'
-            }
-        ];
-
-        function validateField(field, name) {
-            const value = $(field).val().trim();
-            let isValid = value !== '';
-
-            $(field).toggleClass('is-invalid', !isValid);
-            $(field).toggleClass('is-valid', isValid);
-            $(field).siblings('.text-danger').text(isValid ? '' : `${name} is required.`);
-
-            return isValid;
-        }
-
-        fields.forEach(f => {
-            $(f.id).on('input change', function() {
-                validateField(this, f.name);
+            // Unit change → load details
+            $('#unit_no').change(function() {
+                let unitId = $(this).val();
+                loadUnitDetails(unitId);
             });
-        });
 
-        $('#myform').on('submit', function(e) {
-            let valid = true;
+            // INITIAL LOAD
+            if (selectedComponent) {
+                loadUnits(selectedComponent, selectedUnit);
+            }
+
+            const fields = [{
+                    id: '#sr_no',
+                    name: 'Sr No'
+                },
+                {
+                    id: '#date',
+                    name: 'Date'
+                },
+                {
+                    id: '#employee_id',
+                    name: 'Employee'
+                },
+                {
+                    id: '#component_no',
+                    name: 'Component No'
+                },
+                {
+                    id: '#unit_no',
+                    name: 'Unit No'
+                },
+                {
+                    id: '#process',
+                    name: 'Process'
+                },
+                {
+                    id: '#qty',
+                    name: 'Quantity'
+                },
+                {
+                    id: '#weight',
+                    name: 'Weight'
+                },
+                {
+                    id: '#total_weight',
+                    name: 'Total Weight'
+                }
+            ];
+
+            function validateField(field, name) {
+                const value = $(field).val().trim();
+                let isValid = value !== '';
+                $(field).toggleClass('is-invalid', !isValid);
+                $(field).toggleClass('is-valid', isValid);
+                $(field).siblings('.text-danger').text(isValid ? '' : `${name} is required.`);
+                return isValid;
+            }
+
             fields.forEach(f => {
-                if (!validateField(f.id, f.name)) valid = false;
+                $(f.id).on('input change', function() {
+                    validateField(this, f.name);
+                });
             });
 
-            if (!valid) e.preventDefault();
+            $('#myform').on('submit', function(e) {
+                let valid = true;
+                fields.forEach(f => {
+                    if (!validateField(f.id, f.name)) valid = false;
+                });
+                if (!valid) e.preventDefault();
+            });
+
         });
     </script>
 @endsection
