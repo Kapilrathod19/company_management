@@ -34,11 +34,91 @@
             font-size: 10px;
             line-height: 1;
         }
+
+        .row-completed {
+            background-color: #d4edda !important;
+            /* green */
+        }
+
+        .row-partial {
+            background-color: #fff3cd !important;
+            /* yellow */
+        }
+
+        .row-not-started {
+            background-color: #f8d7da !important;
+            /* red */
+        }
+
+        #tableSummary span {
+            border-radius: 4px;
+            color: #000;
+            font-weight: 600;
+        }
     </style>
 
 
     <div class="content-page">
         <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-dark shadow-sm border-0" style="background: #e3e3ff;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 class="mb-0">{{ $totalUnits }}</h3>
+                                <small class="text-muted">Total Units</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-layer-group fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-dark shadow-sm border-0" style="background: #d4edda;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 class="mb-0">{{ $completedUnits }}</h3>
+                                <small class="text-success">Completed Units</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-dark shadow-sm border-0" style="background: #fff3cd;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 class="mb-0">{{ $partialUnits }}</h3>
+                                <small class="text-warning">Partial Units</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-hourglass-half fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card text-dark shadow-sm border-0" style="background: #f8d7da;">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 class="mb-0">{{ $pendingUnits }}</h3>
+                                <small class="text-danger">Pending Units</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-times-circle fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="row">
                 <div class="col-12">
@@ -62,9 +142,18 @@
                                 <select id="ComponentNumberSearch" class="form-control select2">
                                     <option value="">Select Component Number</option>
                                     @foreach ($items as $item)
-                                        <option value="{{ $item->id }}">{{ $item->part_number }}</option>
+                                        <option value="{{ $item->id }}" data-part_number="{{ $item->part_number }}">
+                                            {{ $item->part_number }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div id="tableSummary" class="fw-semibold">
+                                    <!-- Dynamic counts will appear here -->
+                                </div>
                             </div>
                         </div>
 
@@ -148,11 +237,14 @@
         function loadSalesOrders() {
 
             let itemId = $('#ComponentNumberSearch').val();
+            let partNumber = $('#ComponentNumberSearch option:selected').data('part_number');
             let fromDate = $('#fromDate').val();
             let toDate = $('#toDate').val();
             let tbody = $('#tabledata tbody');
+            let summaryDiv = $('#tableSummary');
 
             tbody.empty();
+            summaryDiv.empty();
 
             if (!itemId) return;
 
@@ -160,6 +252,7 @@
                 url: '{{ route('get.sales.orders.by.item', ':id') }}'.replace(':id', itemId),
                 type: 'GET',
                 data: {
+                    partNumber: partNumber,
                     from_date: fromDate,
                     to_date: toDate
                 },
@@ -176,9 +269,28 @@
                         return;
                     }
 
+                    // Counters
+                    let redCount = 0,
+                        yellowCount = 0,
+                        greenCount = 0;
+
                     $.each(data, function(index, row) {
+
+                        let rowClass = '';
+
+                        if (row.process_status === 'completed') {
+                            rowClass = 'row-completed';
+                            greenCount++;
+                        } else if (row.process_status === 'partial') {
+                            rowClass = 'row-partial';
+                            yellowCount++;
+                        } else if (row.process_status === 'not_started') {
+                            rowClass = 'row-not-started';
+                            redCount++;
+                        }
+
                         tbody.append(`
-                    <tr>
+                    <tr class="${rowClass}">
                         <td>${row.unit_no}</td>
                         <td>${row.customer_name}</td>
                         <td>${row.po_no}</td>
@@ -200,12 +312,20 @@
                     </tr>
                 `);
                     });
+
+                    // Update summary below table
+                    summaryDiv.html(`
+                <span class="row-not-started px-2 py-1 me-2">Red: ${redCount} Not Started</span>
+                <span class="row-partial px-2 py-1 me-2">Yellow: ${yellowCount} Partial</span>
+                <span class="row-completed px-2 py-1">Green: ${greenCount} Completed</span>
+            `);
                 },
                 error: function() {
                     console.error('Failed to load sales orders');
                 }
             });
         }
+
 
         function viewAllProcesses(salesOrderId, unitNo) {
 

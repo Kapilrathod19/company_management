@@ -17,13 +17,50 @@ class UserController extends Controller
 {
     public function index()
     {
-        $items = Item::where('category', 'Finished Item')->where('user_id', auth()->id())->get();
-        return view('user.dashboard', compact('items'));
+        $items = Item::where('category', 'Finished Item')
+            ->where('user_id', auth()->id())
+            ->get();
+
+        // Get all sales orders for this user
+        $salesOrders = SalesOrder::with(['item.processes'])
+            ->where('user_id', auth()->id())
+            ->get();
+
+        $totalUnits = $salesOrders->count();
+        $completedUnits = 0;
+        $partialUnits = 0;
+        $pendingUnits = 0;
+
+        foreach ($salesOrders as $order) {
+            $totalProcesses = $order->item->processes->count();
+
+            $completedProcesses = Production::where('unit_no', $order->id)
+                ->where('user_id', auth()->id())
+                ->distinct('process')
+                ->count('process');
+
+            if ($completedProcesses == 0) {
+                $pendingUnits++;
+            } elseif ($completedProcesses < $totalProcesses) {
+                $partialUnits++;
+            } else {
+                $completedUnits++;
+            }
+        }
+
+        return view('user.dashboard', compact(
+            'items',
+            'totalUnits',
+            'completedUnits',
+            'partialUnits',
+            'pendingUnits'
+        ));
     }
 
     public function getSalesOrdersByItem(Request $request, $itemId)
     {
-        $query = SalesOrder::with('party')->where('part_no', $itemId);
+        $query = SalesOrder::with(['party', 'item.processes.processMaster'])
+            ->where('part_no', $itemId);
 
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('po_date', [
@@ -32,28 +69,36 @@ class UserController extends Controller
             ]);
         }
 
-        $salesOrders = $query->select('id', 'customer_name', 'unit_no', 'po_no', 'po_date')->get();
-
+        $salesOrders = $query->get();
         $supplier = Supplier::where('part_no', $itemId)->latest('id')->first();
-
-        $supplierPoDate = $supplier && $supplier->po_date
-            ? Carbon::parse($supplier->po_date)->format('d-m-Y')
-            : '-';
-
-        $supplierPoNo = $supplier->po_no ?? '-';
-
         $rows = [];
 
         foreach ($salesOrders as $order) {
 
-            $grn = Grn::where('unit_no', $order->unit_no)->first();
+            $totalProcesses = $order->item->processes->count();
+
+            $completedProcesses = Production::where('unit_no', $order->id)->where('user_id', auth()->id())
+                ->where('component_no', $request->partNumber)
+                ->distinct('process')
+                ->count('process');
+            /** STATUS */
+            if ($completedProcesses == 0) {
+                $status = 'not_started'; // RED
+            } elseif ($completedProcesses < $totalProcesses) {
+                $status = 'partial'; // YELLOW
+            } else {
+                $status = 'completed'; // GREEN
+            }
 
             $lastProduction = Production::with('processDetails')
                 ->where('unit_no', $order->id)
                 ->latest('id')
                 ->first();
 
+            $grn = Grn::where('unit_no', $order->unit_no)->first();
+
             $rows[] = [
+
                 'sales_order_id' => $order->id,
                 'customer_name' => $order->party->name ?? '-',
                 'unit_no' => $order->unit_no,
@@ -61,8 +106,10 @@ class UserController extends Controller
                 'po_date' => $order->po_date
                     ? Carbon::parse($order->po_date)->format('d-m-Y')
                     : '-',
-                'supplier_po_no' => $supplierPoNo,
-                'supplier_po_date' => $supplierPoDate,
+                'supplier_po_no' => $supplier->po_no ?? '-',
+                'supplier_po_date' => isset($supplier->po_date)
+                    ? Carbon::parse($supplier->po_date)->format('d-m-Y')
+                    : '-',
                 'party_challan_no' => $grn->party_challan_no ?? '-',
                 'party_challan_date' => isset($grn->party_challan_date)
                     ? Carbon::parse($grn->party_challan_date)->format('d-m-Y')
@@ -73,7 +120,9 @@ class UserController extends Controller
                 'process' => $lastProduction && $lastProduction->processDetails
                     ? $lastProduction->processDetails->process_number . ' - ' . $lastProduction->processDetails->process_name
                     : '-',
-                'has_process' => (bool) $lastProduction
+
+                'has_process' => $completedProcesses > 0,
+                'process_status' => $status, // 👈 important
             ];
         }
 
