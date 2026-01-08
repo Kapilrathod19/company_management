@@ -21,7 +21,6 @@ class UserController extends Controller
             ->where('user_id', auth()->id())
             ->get();
 
-        // Get all sales orders for this user
         $salesOrders = SalesOrder::with(['item.processes'])
             ->where('user_id', auth()->id())
             ->get();
@@ -60,7 +59,7 @@ class UserController extends Controller
     public function getSalesOrdersByItem(Request $request, $itemId)
     {
         $query = SalesOrder::with(['party', 'item.processes.processMaster'])
-            ->where('part_no', $itemId);
+            ->where('user_id', auth()->id())->where('part_no', $itemId);
 
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('po_date', [
@@ -70,7 +69,7 @@ class UserController extends Controller
         }
 
         $salesOrders = $query->get();
-        $supplier = Supplier::where('part_no', $itemId)->latest('id')->first();
+        $supplier = Supplier::where('part_no', $itemId)->where('user_id', auth()->id())->latest('id')->first();
         $rows = [];
 
         foreach ($salesOrders as $order) {
@@ -91,11 +90,11 @@ class UserController extends Controller
             }
 
             $lastProduction = Production::with('processDetails')
-                ->where('unit_no', $order->id)
+                ->where('unit_no', $order->id)->where('user_id', auth()->id())
                 ->latest('id')
                 ->first();
 
-            $grn = Grn::where('unit_no', $order->unit_no)->first();
+            $grn = Grn::where('unit_no', $order->unit_no)->where('user_id', auth()->id())->first();
 
             $rows[] = [
 
@@ -122,7 +121,7 @@ class UserController extends Controller
                     : '-',
 
                 'has_process' => $completedProcesses > 0,
-                'process_status' => $status, // 👈 important
+                'process_status' => $status,
             ];
         }
 
@@ -132,7 +131,7 @@ class UserController extends Controller
     public function getAllProcessesBySalesOrder($salesOrderId)
     {
         $productions = Production::with('employee', 'processDetails')
-            ->where('unit_no', $salesOrderId)
+            ->where('unit_no', $salesOrderId)->where('user_id', auth()->id())
             ->orderBy('id')
             ->get();
 
