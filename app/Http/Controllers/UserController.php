@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CompanyUser;
 use App\Models\Grn;
 use App\Models\Item;
+use App\Models\Party;
 use App\Models\Production;
 use App\Models\SalesOrder;
 use App\Models\Supplier;
@@ -20,6 +21,9 @@ class UserController extends Controller
         $items = Item::where('category', 'Finished Item')
             ->where('user_id', auth()->id())
             ->get();
+
+        $customers = Party::where('user_id', auth()->id())->where('category', 'Customer')
+            ->orderBy('name')->where('status', '1')->get();
 
         $salesOrders = SalesOrder::with(['item.processes'])
             ->where('user_id', auth()->id())
@@ -49,6 +53,7 @@ class UserController extends Controller
 
         return view('user.dashboard', compact(
             'items',
+            'customers',
             'totalUnits',
             'completedUnits',
             'partialUnits',
@@ -60,6 +65,10 @@ class UserController extends Controller
     {
         $query = SalesOrder::with(['party', 'item.processes.processMaster'])
             ->where('user_id', auth()->id())->where('part_no', $itemId);
+
+        if ($request->filled('customer_id')) {
+            $query->where('customer_name', $request->customer_id);
+        }
 
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('po_date', [

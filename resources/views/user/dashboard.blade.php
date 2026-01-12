@@ -127,19 +127,31 @@
 
                         <div class="row g-3 mb-4">
 
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <label class="fw-semibold mb-1">From Date</label>
                                 <input type="date" id="fromDate" class="form-control">
                             </div>
 
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <label class="fw-semibold mb-1">To Date</label>
                                 <input type="date" id="toDate" class="form-control">
                             </div>
 
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
+                                <label class="fw-semibold mb-1">Customer</label>
+                                <select id="CustomerSearch" class="form-control select2" data-placeholder="Select Customer">
+                                    <option value="">Select Customer</option>
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}">
+                                            {{ $customer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <label class="fw-semibold mb-1">Component No</label>
-                                <select id="ComponentNumberSearch" class="form-control select2">
+                                <select id="ComponentNumberSearch" class="form-control select2" data-placeholder="Select Component Number">
                                     <option value="">Select Component Number</option>
                                     @foreach ($items as $item)
                                         <option value="{{ $item->id }}" data-part_number="{{ $item->part_number }}">
@@ -224,12 +236,12 @@
         $(document).ready(function() {
 
             $('.select2').select2({
-                placeholder: "Select Component Number",
                 allowClear: true,
                 width: '100%'
             });
 
             $('#ComponentNumberSearch').on('change', loadSalesOrders);
+            $('#CustomerSearch').on('change', loadSalesOrders);
 
             $('#fromDate, #toDate').on('change', loadSalesOrders);
         });
@@ -241,18 +253,20 @@
             let fromDate = $('#fromDate').val();
             let toDate = $('#toDate').val();
             let tbody = $('#tabledata tbody');
+            let customerId = $('#CustomerSearch').val();
             let summaryDiv = $('#tableSummary');
 
             tbody.empty();
             summaryDiv.empty();
 
-            if (!itemId) return;
+            if (!itemId && !customerId) return;
 
             $.ajax({
                 url: '{{ route('get.sales.orders.by.item', ':id') }}'.replace(':id', itemId),
                 type: 'GET',
                 data: {
                     partNumber: partNumber,
+                    customer_id: customerId,
                     from_date: fromDate,
                     to_date: toDate
                 },
@@ -304,9 +318,9 @@
                         <td>
                             ${row.has_process
                                 ? `<button class="btn btn-sm btn-primary"
-                                        onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
-                                        View All
-                                       </button>`
+                                            onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
+                                            View All
+                                           </button>`
                                 : '-'}
                         </td>
                     </tr>
