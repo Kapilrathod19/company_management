@@ -6,6 +6,7 @@ use App\Models\CompanyUser;
 use App\Models\Grn;
 use App\Models\Item;
 use App\Models\Party;
+use App\Models\ProcessAssignment;
 use App\Models\Production;
 use App\Models\SalesOrder;
 use App\Models\Supplier;
@@ -109,6 +110,7 @@ class UserController extends Controller
 
                 'sales_order_id' => $order->id,
                 'customer_name' => $order->party->name ?? '-',
+                'part_no' => $itemId,
                 'unit_no' => $order->unit_no,
                 'po_no' => $order->po_no,
                 'po_date' => $order->po_date
@@ -137,29 +139,70 @@ class UserController extends Controller
         return response()->json($rows);
     }
 
-    public function getAllProcessesBySalesOrder($salesOrderId)
+    public function getAllProcessesBySalesOrder(Request $request, $salesOrderId)
     {
+        $componentNo = $request->component_no;
+        $unitNo      = $request->unit_no;
+
         $productions = Production::with('employee', 'processDetails')
             ->where('unit_no', $salesOrderId)->where('user_id', auth()->id())
             ->orderBy('id')
             ->get();
 
-        $data = $productions->map(function ($item) {
+
+        $data = $productions->map(function ($prod, $index) use ($componentNo, $unitNo) {
+            // Assigned process (planned)
+
+            $assignment = ProcessAssignment::with('employee')
+                ->where('user_id', auth()->id())
+                ->where('unit_no', $unitNo)
+                ->where('component_no', $componentNo)
+                ->where('process_master_id', $prod->process)
+                ->first();
+
+            $assignedDate = $assignment?->process_date;
+            $processDate  = $prod->date;
+
+            // Date difference
+            $difference = ($assignedDate && $processDate)
+                ? Carbon::parse($assignedDate)->diffInDays(Carbon::parse($processDate), false)
+                : null;
+
             return [
-                'employee' => $item->employee ? ($item->employee->emp_no ?? '-') . ' - ' . ($item->employee->employee_name ?? '-') : '-',
-                'qty' => $item->qty ?? '-',
-                'weight' => $item->weight ?? '-',
-                'process_date' => isset($item->date)
-                    ? Carbon::parse($item->date)->format('d-m-Y')
+                'sr_no' => $index + 1,
+
+                'assigned_employee' => $assignment && $assignment->employee
+                    ? ($assignment->employee->emp_no ?? '-') . ' - ' . ($assignment->employee->employee_name ?? '-')
                     : '-',
-                'process' => $item->processDetails
-                    ? $item->processDetails->process_number . ' - ' . $item->processDetails->process_name
+
+                'actual_employee' => $prod->employee
+                    ? ($prod->employee->emp_no ?? '-') . ' - ' . ($prod->employee->employee_name ?? '-')
+                    : '-',
+
+                'qty' => $prod->qty ?? '-',
+                'weight' => $prod->weight ?? '-',
+
+                'assigned_date' => $assignedDate
+                    ? Carbon::parse($assignedDate)->format('d-m-Y')
+                    : '-',
+
+                'process_date' => $processDate
+                    ? Carbon::parse($processDate)->format('d-m-Y')
+                    : '-',
+
+                'process' => $prod->processDetails
+                    ? $prod->processDetails->process_number . ' - ' . $prod->processDetails->process_name
+                    : '-',
+
+                'difference' => is_numeric($difference)
+                    ? $difference . ' Days'
                     : '-',
             ];
         });
 
         return response()->json($data);
     }
+
 
     public function profile()
     {

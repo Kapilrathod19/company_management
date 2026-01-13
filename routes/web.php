@@ -159,6 +159,8 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/destroy/{id}', [SalesOrderController::class, 'destroy'])->name('sales_order.destroy')->middleware('permission:sales_order,delete');
     });
     Route::get('get-item/{id}', [SalesOrderController::class, 'getItem'])->name('item.get');
+    Route::get('/get-process/{id}', [SalesOrderController::class, 'getProcesses'])->name('sales_order.process.get');
+    Route::post('/process/assign', [SalesOrderController::class, 'assign'])->name('process.assign');
 
     Route::prefix('supplier')->group(function () {
         Route::get('/', [SupplierController::class, 'index'])->name('supplier.index')->middleware('permission:supplier_PO,view');

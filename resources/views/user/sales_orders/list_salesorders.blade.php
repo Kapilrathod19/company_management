@@ -1,6 +1,12 @@
 @extends('user.layout.main_layout')
 @section('title', 'User | Sales Order List')
 @section('content')
+    <style>
+        .table-danger {
+            background-color: #ffe5e5 !important;
+        }
+    </style>
+
     <div class="content-page">
         <div class="container-fluid">
             <div class="row">
@@ -85,6 +91,12 @@
                                                             <i class="bi bi-trash-fill"></i>
                                                         </a>
                                                     @endif
+                                                    <button class="btn btn-success btn-sm mb-2 show-process-btn"
+                                                        data-id="{{ $item->id }}" data-part_no="{{ $item->part_no }}"
+                                                        data-unit_no="{{ $item->unit_no }}" title="Planning Process"
+                                                        data-toggle="tooltip" data-placement="top">
+                                                        <i class="bi bi-diagram-3"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -93,6 +105,40 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="processModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">All Processes
+                        <small class="text-muted d-block" id="processMeta"></small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Process Number</th>
+                                <th>Process Name</th>
+                                <th>Employee</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processData"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="saveProcessBtn">
+                        Save Process Assignment
+                    </button>
                 </div>
             </div>
         </div>
@@ -122,6 +168,141 @@
                     });
                 });
             });
+        });
+
+        const employees = @json($employees);
+
+        document.querySelectorAll('.show-process-btn').forEach(btn => {
+
+            btn.addEventListener('click', function() {
+
+                currentComponentNo = this.dataset.part_no;
+                currentUnitNo = this.dataset.unit_no;
+
+                document.getElementById('processMeta').innerHTML =
+                    `Unit No: <strong>${currentUnitNo}</strong>`;
+
+                document.getElementById('processData').innerHTML =
+                    '<tr><td colspan="5">Loading...</td></tr>';
+
+                let url = "{{ route('sales_order.process.get', ':id') }}"
+                    .replace(':id', currentComponentNo);
+
+                url += `?component_no=${currentComponentNo}&unit_no=${currentUnitNo}`;
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+
+                        let rows = '';
+
+                        data.forEach((p, index) => {
+
+                            let selectedEmployee = p.process_assignment?.employee_id ?? '';
+                            let selectedDate = p.process_assignment?.process_date ?? '';
+
+                            let empOptions = '<option value="">Select Employee</option>';
+                            employees.forEach(emp => {
+                                empOptions += `
+                                <option value="${emp.id}"
+                                    ${emp.id == selectedEmployee ? 'selected' : ''}>
+                                    ${emp.emp_no} - ${emp.employee_name}
+                                </option>`;
+                            });
+
+                            rows += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${p.process_master.process_number}</td>
+                                <td>${p.process_master.process_name}</td>
+                                <td>
+                                    <select class="form-control"
+                                        name="processes[${p.process_master.id}][employee_id]">
+                                        ${empOptions}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="date"
+                                        class="form-control"
+                                        value="${selectedDate ?? ''}"
+                                        name="processes[${p.process_master.id}][date]">
+                                </td>
+                            </tr>`;
+                        });
+
+                        document.getElementById('processData').innerHTML = rows;
+                    });
+
+                new bootstrap.Modal(document.getElementById('processModal')).show();
+            });
+        });
+
+
+        let currentComponentNo = '';
+        let currentUnitNo = '';
+
+        document.getElementById('saveProcessBtn').addEventListener('click', function() {
+
+            let formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('component_no', currentComponentNo);
+            formData.append('unit_no', currentUnitNo);
+
+            let hasError = false;
+
+            document.querySelectorAll('#processData tr').forEach(row => {
+
+                // reset previous error state
+                row.classList.remove('table-danger');
+
+                let select = row.querySelector('select');
+                let date = row.querySelector('input[type="date"]');
+
+                if (!select || !date) return;
+
+                let employeeVal = select.value;
+                let dateVal = date.value;
+
+                if (
+                    (employeeVal && !dateVal) ||
+                    (!employeeVal && dateVal)
+                ) {
+                    hasError = true;
+                    row.classList.add('table-danger');
+                }
+
+                if (employeeVal && dateVal) {
+                    let id = select.name.match(/\d+/)[0];
+                    formData.append(`processes[${id}][employee_id]`, employeeVal);
+                    formData.append(`processes[${id}][date]`, dateVal);
+                }
+            });
+
+            if (hasError) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete Process Assignment',
+                    text: 'Please select BOTH Employee and Date for highlighted rows.'
+                });
+                return;
+            }
+
+            fetch("{{ route('process.assign') }}", {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status) {
+                        Swal.fire({
+                            icon: "success",
+                            text: "Process Assignment Saved!",
+                            timer: 1000,
+                            showConfirmButton: false
+                        });
+                        $('#processModal').modal('hide');
+                    }
+                });
         });
     </script>
 @endsection

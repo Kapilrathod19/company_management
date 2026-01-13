@@ -19,4 +19,9 @@ class Process extends Model
     {
         return $this->belongsTo(ProcessMaster::class, 'process_id');
     }
+
+    public function processAssignment()
+    {
+        return $this->hasOne(ProcessAssignment::class, 'process_master_id', 'process_id');
+    }
 }

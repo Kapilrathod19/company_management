@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
 use App\Models\Item;
 use App\Models\Party;
 use App\Models\Permission;
+use App\Models\Process;
+use App\Models\ProcessAssignment;
 use App\Models\SalesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,7 +18,8 @@ class SalesOrderController extends Controller
     {
         $salesorders = SalesOrder::with('party', 'item')->where('user_id', auth()->id())->latest()->get();
         $permissions = Permission::where('user_id', auth()->id())->get()->keyBy('module');
-        return view('user.sales_orders.list_salesorders', compact('salesorders', 'permissions'));
+        $employees = Employee::where('user_id', auth()->id())->where('status', 'Active')->latest()->get();
+        return view('user.sales_orders.list_salesorders', compact('salesorders', 'permissions', 'employees'));
     }
 
     public function create()
@@ -216,6 +220,58 @@ class SalesOrderController extends Controller
             'status' => true,
             'description' => $item->description,
             'unit' => $item->unit
+        ]);
+    }
+
+    public function getProcesses($itemId)
+    {
+        $componentNo = request('component_no');
+        $unitNo = request('unit_no');
+
+        $processes = Process::with([
+            'processMaster',
+            'processAssignment' => function ($q) use ($componentNo, $unitNo) {
+                $q->where('user_id', auth()->id())
+                ->where('component_no', $componentNo)
+                ->where('unit_no', $unitNo);
+            }
+        ])
+        ->where('item_id', $itemId)
+        ->orderBy('position')
+        ->get();
+        return response()->json($processes);
+    }
+
+    public function assign(Request $request)
+    {
+        $request->validate([
+            'component_no' => 'required',
+            'unit_no' => 'required',
+            'processes' => 'required|array',
+        ]);
+
+        foreach ($request->processes as $processMasterId => $row) {
+
+            if (!empty($row['employee_id']) && !empty($row['date'])) {
+
+                ProcessAssignment::updateOrCreate(
+                    [
+                        'user_id' => auth()->id(),
+                        'component_no' => $request->component_no,
+                        'unit_no' => $request->unit_no,
+                        'process_master_id' => $processMasterId,
+                    ],
+                    [
+                        'employee_id' => $row['employee_id'],
+                        'process_date' => $row['date'],
+                    ]
+                );
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Process assigned successfully'
         ]);
     }
 }

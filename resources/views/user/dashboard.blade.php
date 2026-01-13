@@ -151,7 +151,8 @@
 
                             <div class="col-lg-3 col-md-4 col-sm-12">
                                 <label class="fw-semibold mb-1">Component No</label>
-                                <select id="ComponentNumberSearch" class="form-control select2" data-placeholder="Select Component Number">
+                                <select id="ComponentNumberSearch" class="form-control select2"
+                                    data-placeholder="Select Component Number">
                                     <option value="">Select Component Number</option>
                                     @foreach ($items as $item)
                                         <option value="{{ $item->id }}" data-part_number="{{ $item->part_number }}">
@@ -215,11 +216,14 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Employee Name</th>
+                                <th>Assigned Employee</th>
+                                <th>Actual Employee</th>
                                 <th>Qty</th>
                                 <th>Weight</th>
+                                <th>Assigned Date</th>
                                 <th>Process Date</th>
                                 <th>Process</th>
+                                <th>Difference (Days)</th>
                             </tr>
                         </thead>
                         <tbody id="allProcessBody"></tbody>
@@ -304,27 +308,27 @@
                         }
 
                         tbody.append(`
-                    <tr class="${rowClass}">
-                        <td>${row.unit_no}</td>
-                        <td>${row.customer_name}</td>
-                        <td>${row.po_no}</td>
-                        <td>${row.po_date}</td>
-                        <td>${row.supplier_po_no}</td>
-                        <td>${row.supplier_po_date}</td>
-                        <td>${row.party_challan_no}</td>
-                        <td>${row.party_challan_date}</td>
-                        <td>${row.production_date}</td>
-                        <td>${row.process}</td>
-                        <td>
-                            ${row.has_process
-                                ? `<button class="btn btn-sm btn-primary"
-                                            onclick="viewAllProcesses(${row.sales_order_id}, '${row.unit_no}')">
-                                            View All
-                                           </button>`
-                                : '-'}
-                        </td>
-                    </tr>
-                `);
+                            <tr class="${rowClass}">
+                                <td>${row.unit_no}</td>
+                                <td>${row.customer_name}</td>
+                                <td>${row.po_no}</td>
+                                <td>${row.po_date}</td>
+                                <td>${row.supplier_po_no}</td>
+                                <td>${row.supplier_po_date}</td>
+                                <td>${row.party_challan_no}</td>
+                                <td>${row.party_challan_date}</td>
+                                <td>${row.production_date}</td>
+                                <td>${row.process}</td>
+                                <td>
+                                    ${row.has_process
+                                        ? `<button class="btn btn-sm btn-primary"
+                                                        onclick="viewAllProcesses(${row.sales_order_id},'${row.part_no}', '${row.unit_no}')">
+                                                        View All
+                                                    </button>`
+                                        : '-'}
+                                </td>
+                            </tr>
+                        `);
                     });
 
                     // Update summary below table
@@ -341,37 +345,44 @@
         }
 
 
-        function viewAllProcesses(salesOrderId, unitNo) {
+        function viewAllProcesses(salesOrderId, partNo, unitNo) {
 
             $('#allProcessTitle').html(
                 `All Processes for Unit: <strong>${unitNo}</strong>`
             );
 
             $('#allProcessBody').html(`
-                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                <tr><td colspan="9" class="text-center">Loading...</td></tr>
             `);
 
             $('#allProcessModal').modal('show');
 
             $.get(
-                '{{ route('production.all.processes', ':id') }}'.replace(':id', salesOrderId),
+                '{{ route('production.all.processes', ':id') }}'.replace(':id', salesOrderId), {
+                    component_no: partNo,
+                    unit_no: unitNo
+                },
                 function(data) {
 
                     let rows = '';
 
                     if (data.length === 0) {
-                        rows = `<tr><td colspan="6" class="text-center">No process found</td></tr>`;
+                        rows = `<tr><td colspan="9" class="text-center">No process found</td></tr>`;
                     } else {
                         $.each(data, function(i, row) {
                             rows += `
-                    <tr>
-                        <td>${i + 1}</td>
-                        <td>${row.employee}</td>
-                        <td>${row.qty}</td>
-                        <td>${row.weight}</td>
-                        <td>${row.process_date}</td>
-                        <td>${row.process}</td>
-                    </tr>`;
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td>${row.assigned_employee}</td>
+                            <td>${row.actual_employee}</td>
+                            <td>${row.qty}</td>
+                            <td>${row.weight}</td>
+                            <td>${row.assigned_date}</td>
+                            <td>${row.process_date}</td>
+                            <td>${row.process}</td>
+                            <td>${row.difference}</td>
+                        </tr>
+                    `;
                         });
                     }
 
