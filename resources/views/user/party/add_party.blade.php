@@ -50,9 +50,12 @@
                                         <label for="category" class="form-label">Category</label>
                                         <select name="category" id="category" class="form-control">
                                             <option value="">Select Category</option>
-                                            <option value="Customer">Customer</option>
-                                            <option value="Supplier">Supplier</option>
-                                            <option value="Jobwork">Jobwork</option>
+                                            <option value="Customer" {{ old('category') == 'Customer' ? 'selected' : '' }}>
+                                                Customer</option>
+                                            <option value="Supplier" {{ old('category') == 'Supplier' ? 'selected' : '' }}>
+                                                Supplier</option>
+                                            <option value="Jobwork" {{ old('category') == 'Jobwork' ? 'selected' : '' }}>
+                                                Jobwork</option>
                                         </select>
                                         <span class="text-danger"></span>
                                     </div>
@@ -70,28 +73,34 @@
                                             value="{{ old('email') }}">
                                         <span class="text-danger"></span>
                                     </div>
-
+                                    
                                     <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" name="password" id="password" class="form-control"
+                                            value="{{ old('password') }}">
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
                                         <label for="mobile_number" class="form-label">Mobile Number</label>
                                         <input type="text" name="mobile_number" id="mobile_number" class="form-control"
                                             value="{{ old('mobile_number') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="gst_number" class="form-label">GST Number</label>
                                         <input type="text" name="gst_number" id="gst_number" class="form-control"
                                             value="{{ old('gst_number') }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="status" class="form-label">Status</label>
                                         <select name="status" id="status" class="form-control">
-                                            <option value="1" {{ old('status') == 'Active' ? 'selected' : '' }}
-                                                selected>Active
+                                            <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Active
                                             </option>
-                                            <option value="0" {{ old('status') == 'Inactive' ? 'selected' : '' }}>
+                                            <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>
                                                 Inactive</option>
                                         </select>
                                         <span class="text-danger"></span>
@@ -136,6 +145,10 @@
                 {
                     id: '#email',
                     name: 'Email'
+                },
+                {
+                    id: '#password',
+                    name: 'Password'
                 },
                 {
                     id: '#mobile_number',

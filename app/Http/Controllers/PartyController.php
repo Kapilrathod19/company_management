@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Party;
 use App\Models\Permission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PartyController extends Controller
 {
@@ -28,7 +30,13 @@ class PartyController extends Controller
         $request->validate([
             'category' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email'         => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('parties', 'email')
+                    ->where('category', $request->category),
+            ],
             'mobile_number' => 'required|string|max:15',
             'gst_number' => 'required|string|max:20',
             'address' => 'required|string|max:500',
@@ -39,6 +47,7 @@ class PartyController extends Controller
             'category' => $request->category,
             'name' => $request->name,
             'email' => $request->email,
+            'password' => Hash::make($request->password),
             'mobile_number' => $request->mobile_number,
             'gst_number' => $request->gst_number,
             'address' => $request->address,
@@ -63,7 +72,13 @@ class PartyController extends Controller
         $request->validate([
             'category' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email'         => [
+                'required',
+                'email',
+                Rule::unique('parties', 'email')
+                    ->where('category', $request->category)
+                    ->ignore($party->id),
+            ],
             'mobile_number' => 'required|string|max:15',
             'gst_number' => 'required|string|max:20',
             'address' => 'required|string|max:500',
@@ -79,9 +94,14 @@ class PartyController extends Controller
             'status' => $request->status,
         ]);
 
+        if ($request->filled('password')) {
+            $party->update([
+                'password' => Hash::make($request->password),
+            ]);
+        }
+
         return redirect()->route('party.index')->with('success', 'Party updated successfully.');
     }
-
 
     public function destroy($id)
     {

@@ -66,20 +66,26 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Password (leave blank to keep old)</label>
+                                        <input type="password" name="password" id="password" class="form-control">
+                                        <span class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
                                         <label for="mobile_number" class="form-label">Mobile Number</label>
                                         <input type="text" name="mobile_number" id="mobile_number" class="form-control"
                                             value="{{ old('mobile_number', $party->mobile_number) }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="gst_number" class="form-label">GST Number</label>
                                         <input type="text" name="gst_number" id="gst_number" class="form-control"
                                             value="{{ old('gst_number', $party->gst_number) }}">
                                         <span class="text-danger"></span>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="status" class="form-label">Status</label>
                                         <select name="status" id="status" class="form-control">
                                             <option value="1"
