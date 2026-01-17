@@ -14,6 +14,7 @@ use App\Http\Controllers\GrnController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PartyController;
+use App\Http\Controllers\PartyDashboardController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\ProductionController;
@@ -233,4 +234,16 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::put('/update/{id}', [DocumentsController::class, 'update'])->name('documents.update')->middleware('permission:documents,edit');
         Route::get('/destroy/{id}', [DocumentsController::class, 'destroy'])->name('documents.destroy')->middleware('permission:documents,delete');
     });
+});
+
+Route::middleware(['auth:party'])->prefix('party')->group(function () {
+    Route::get('dashboard', [PartyDashboardController::class, 'index'])->name('party.dashboard');
+    Route::get('profile', [PartyDashboardController::class, 'profile'])->name('party.profile');
+    Route::post('profile', [PartyDashboardController::class, 'profile_store'])->name('party_profile.store');
+    Route::post('party_change_password', [PartyDashboardController::class, 'change_password'])->name('party_profile.change_password');
+
+    Route::get('/party-get-sales-orders-by-item/{item}', [PartyDashboardController::class, 'getSalesOrdersByItem'])
+        ->name('party.get.sales.orders.by.item');
+    Route::get('/party-production/all-processes/{salesOrderId}', [PartyDashboardController::class, 'getAllProcessesBySalesOrder'])->name('party.production.all.processes');
+
 });

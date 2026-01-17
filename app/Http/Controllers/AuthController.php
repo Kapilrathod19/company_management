@@ -37,7 +37,22 @@ class AuthController extends Controller
                 return back()->withErrors(['email' => 'Access denied.'])->withInput();
             }
         }
-        
+
+        // Party login
+        if (
+            Auth::guard('party')->attempt([
+                'email'    => $request->email,
+                'password' => $request->password,
+                'category' => 'Customer',
+                'status'   => 1,
+            ])
+        ) {
+            $request->session()->regenerate();
+
+            return redirect()->route('party.dashboard')
+                ->with('success', 'Welcome, ' . Auth::guard('party')->user()->name . '!');
+        }
+
         if (Auth::guard('company_user')->attempt($credentials)) {
             $request->session()->regenerate();
             $companyUser = Auth::guard('company_user')->user();

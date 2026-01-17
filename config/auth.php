@@ -55,6 +55,11 @@ return [
             'driver' => 'session',
             'provider' => 'company_users',
         ],
+
+        'party' => [
+            'driver'   => 'session',
+            'provider' => 'parties',
+        ],
     ],
 
     /*
@@ -83,6 +88,11 @@ return [
         'company_users' => [
             'driver' => 'eloquent',
             'model' => App\Models\CompanyUser::class,
+        ],
+
+        'parties' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\Party::class,
         ],
 
         // 'users' => [
