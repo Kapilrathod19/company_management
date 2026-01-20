@@ -22,16 +22,18 @@ class PartyDashboardController extends Controller
         $customers = Party::where('id', auth()->id())->where('category', 'Customer')
             ->orderBy('name')->where('status', '1')->first();
 
-        $items = Item::where('category', 'Finished Item')
-            ->where('user_id', $customers->user_id)
-            ->get();
-
         $salesOrders = SalesOrder::with(['item.processes'])
             ->where('customer_name', $customers->id)
             ->whereHas('item', function ($q) {
                 $q->where('category', 'Finished Item');
             })
             ->get();
+
+        // ONLY items which exist in sales orders
+        $items = $salesOrders
+            ->pluck('item')
+            ->unique('id')
+            ->values();
 
         $totalUnits = $salesOrders->count();
         $completedUnits = 0;
