@@ -143,10 +143,12 @@ class PartyDashboardController extends Controller
         }
 
         $salesOrders = $query->get();
-        $supplier = Supplier::where('part_no', $itemId)->where('user_id', $customers->user_id)->latest('id')->first();
         $rows = [];
 
         foreach ($salesOrders as $order) {
+
+            $supplier = Supplier::where('unit_no', $order->id)
+                ->where('part_no', $itemId)->where('user_id', $customers->user_id)->latest('id')->first();
 
             $totalProcesses = $order->item->processes->count();
 
