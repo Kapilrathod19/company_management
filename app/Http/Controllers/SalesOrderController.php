@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SalesOrderDocument;
 use App\Models\Employee;
 use App\Models\Item;
 use App\Models\Party;
@@ -272,6 +273,64 @@ class SalesOrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Process assigned successfully'
+        ]);
+    }
+
+    public function uploadDocument(Request $request, $id)
+    {
+        $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
+
+        $request->validate([
+            'documents.*' => 'required|file|max:10240', // 10MB max per file
+        ]);
+
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('sales_order_documents'), $fileName);
+
+                SalesOrderDocument::create([
+                    'user_id' => auth()->id(),
+                    'sales_order_id' => $salesOrder->id,
+                    'title' => $file->getClientOriginalName(),
+                    'document' => $fileName,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Documents uploaded successfully'
+        ]);
+    }
+
+    public function getDocuments($id)
+    {
+        $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
+        
+        $documents = SalesOrderDocument::where('sales_order_id', $salesOrder->id)
+            ->where('user_id', auth()->id())
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'documents' => $documents
+        ]);
+    }
+
+    public function deleteDocument($id)
+    {
+        $document = SalesOrderDocument::where('user_id', auth()->id())->findOrFail($id);
+
+        if (file_exists(public_path('sales_order_documents/' . $document->document))) {
+            unlink(public_path('sales_order_documents/' . $document->document));
+        }
+
+        $document->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Document deleted successfully'
         ]);
     }
 }

@@ -158,6 +158,9 @@ Route::middleware(['auth:company_user'])->prefix('user')->group(function () {
         Route::get('/edit/{id}', [SalesOrderController::class, 'edit'])->name('sales_order.edit')->middleware('permission:sales_order,edit');
         Route::put('/update/{id}', [SalesOrderController::class, 'update'])->name('sales_order.update')->middleware('permission:sales_order,edit');
         Route::get('/destroy/{id}', [SalesOrderController::class, 'destroy'])->name('sales_order.destroy')->middleware('permission:sales_order,delete');
+        Route::post('/upload-document/{id}', [SalesOrderController::class, 'uploadDocument'])->name('sales_order.upload_document');
+        Route::get('/documents/{id}', [SalesOrderController::class, 'getDocuments'])->name('sales_order.get_documents');
+        Route::delete('/document/{id}', [SalesOrderController::class, 'deleteDocument'])->name('sales_order.delete_document');
     });
     Route::get('get-item/{id}', [SalesOrderController::class, 'getItem'])->name('item.get');
     Route::get('/get-process/{id}', [SalesOrderController::class, 'getProcesses'])->name('sales_order.process.get');

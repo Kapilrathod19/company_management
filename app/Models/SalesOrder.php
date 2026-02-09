@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SalesOrderDocument;
 
 class SalesOrder extends Model
 {
@@ -35,5 +36,10 @@ class SalesOrder extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'part_no');
+    }
+
+    public function salesOrderDocuments()
+    {
+        return $this->hasMany(SalesOrderDocument::class, 'sales_order_id');
     }
 }

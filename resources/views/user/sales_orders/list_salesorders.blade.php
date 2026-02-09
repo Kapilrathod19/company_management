@@ -97,6 +97,11 @@
                                                         data-toggle="tooltip" data-placement="top">
                                                         <i class="bi bi-diagram-3"></i>
                                                     </button>
+                                                    <button class="btn btn-info btn-sm mb-2 show-documents-btn"
+                                                        data-id="{{ $item->id }}" data-po_no="{{ $item->po_no }}"
+                                                        title="Upload Documents" data-toggle="tooltip" data-placement="top">
+                                                        <i class="bi bi-file-earmark-arrow-up"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -143,9 +148,138 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="documentsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Documents
+                        <small class="text-muted d-block" id="documentsMeta"></small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label for="fileInput" class="form-label">Choose Files (Images, PDF, etc.)</label>
+                                <input type="file" id="fileInput" class="form-control" multiple
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
+                                <small class="text-muted">(Max 10MB per file)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Uploaded Documents</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm" id="documentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Document Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentsData">
+                                        <tr>
+                                            <td colspan="3" class="text-center">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="uploadDocumentsBtn">
+                        <i class="bi bi-cloud-upload"></i> Upload Files
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('scripts')
     <script>
+        let currentSalesOrderId = '';
+
+        function loadDocuments() {
+            fetch("{{ route('sales_order.get_documents', ':id') }}".replace(':id', currentSalesOrderId))
+                .then(res => res.json())
+                .then(data => {
+                    let rows = '';
+                    if (data.documents.length === 0) {
+                        rows = '<tr><td colspan="3" class="text-center text-muted">No documents uploaded yet</td></tr>';
+                    } else {
+                        data.documents.forEach((doc, index) => {
+                            rows += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>
+                                    <a href="{{ asset('sales_order_documents') }}/${doc.document}" 
+                                       target="_blank" class="text-primary">
+                                        <i class="bi bi-file-earmark"></i> ${doc.title}
+                                    </a>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm delete-doc-btn" 
+                                        data-doc-id="${doc.id}" type="button">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
+                        });
+                    }
+                    document.getElementById('documentsData').innerHTML = rows;
+                });
+        }
+
+        // Event delegation for delete document buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-doc-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.delete-doc-btn');
+                const docId = btn.getAttribute('data-doc-id');
+
+                Swal.fire({
+                    title: 'Delete Document?',
+                    text: `Are you sure you want to delete this document?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("{{ route('sales_order.delete_document', ':id') }}".replace(':id', docId), {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status) {
+                                    Swal.fire('Deleted!', 'Document deleted successfully.', 'success');
+                                    loadDocuments();
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete document.', 'error');
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+                            });
+                    }
+                });
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.delete-confirm').forEach(button => {
                 button.addEventListener('click', function(e) {
@@ -167,6 +301,72 @@
                         }
                     });
                 });
+            });
+
+            // Document upload button handler
+            document.querySelectorAll('.show-documents-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const po_no = this.getAttribute('data-po_no');
+                    currentSalesOrderId = id;
+
+                    document.getElementById('documentsMeta').innerHTML =
+                        `PO No: <strong>${po_no}</strong>`;
+
+                    document.getElementById('fileInput').value = '';
+                    document.getElementById('documentsData').innerHTML =
+                        '<tr><td colspan="3" class="text-center">Loading...</td></tr>';
+
+                    loadDocuments();
+                    new bootstrap.Modal(document.getElementById('documentsModal')).show();
+                });
+            });
+
+            // Upload documents button handler
+            document.getElementById('uploadDocumentsBtn').addEventListener('click', function() {
+                const fileInput = document.getElementById('fileInput');
+                const files = fileInput.files;
+
+                if (files.length === 0) {
+                    Swal.fire('Warning!', 'Please select at least one file to upload.', 'warning');
+                    return;
+                }
+
+                const formData = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('documents[]', files[i]);
+                }
+                formData.append('_token', '{{ csrf_token() }}');
+
+                // Show loading state
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-2"></span>Uploading...';
+
+                fetch("{{ route('sales_order.upload_document', ':id') }}".replace(':id',
+                        currentSalesOrderId), {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+
+                        if (data.status) {
+                            Swal.fire('Success!', data.message, 'success');
+                            fileInput.value = '';
+                            loadDocuments();
+                        } else {
+                            Swal.fire('Error!', 'Failed to upload documents.', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        Swal.fire('Error!', 'An error occurred while uploading.', 'error');
+                    });
             });
         });
 
