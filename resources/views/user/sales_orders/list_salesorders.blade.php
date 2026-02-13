@@ -154,23 +154,30 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Upload Documents
+                    <h5 class="modal-title">Upload Document
                         <small class="text-muted d-block" id="documentsMeta"></small>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label for="fileInput" class="form-label">Choose Files (Images, PDF, etc.)</label>
-                                <input type="file" id="fileInput" class="form-control" multiple
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
-                                <small class="text-muted">(Max 10MB per file)</small>
+                    <form id="uploadDocumentForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="titleInput" class="form-label">Document Title</label>
+                                    <input type="text" id="titleInput" name="title" class="form-control"
+                                        maxlength="255" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="fileInput" class="form-label">Choose File (Image, PDF, etc.)</label>
+                                    <input type="file" id="fileInput" name="document" class="form-control"
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" required>
+                                    <small class="text-muted">(Max 10MB per file)</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -197,8 +204,8 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="uploadDocumentsBtn">
-                        <i class="bi bi-cloud-upload"></i> Upload Files
+                    <button type="button" class="btn btn-primary" id="uploadDocumentBtn">
+                        <i class="bi bi-cloud-upload"></i> Upload Document
                     </button>
                 </div>
             </div>
@@ -322,20 +329,26 @@
                 });
             });
 
-            // Upload documents button handler
-            document.getElementById('uploadDocumentsBtn').addEventListener('click', function() {
+            // Upload document button handler (single file with title)
+            document.getElementById('uploadDocumentBtn').addEventListener('click', function() {
+                const form = document.getElementById('uploadDocumentForm');
                 const fileInput = document.getElementById('fileInput');
-                const files = fileInput.files;
+                const titleInput = document.getElementById('titleInput');
+                const file = fileInput.files[0];
+                const title = titleInput.value.trim();
 
-                if (files.length === 0) {
-                    Swal.fire('Warning!', 'Please select at least one file to upload.', 'warning');
+                if (!file) {
+                    Swal.fire('Warning!', 'Please select a file to upload.', 'warning');
+                    return;
+                }
+                if (!title) {
+                    Swal.fire('Warning!', 'Please enter a document title.', 'warning');
                     return;
                 }
 
                 const formData = new FormData();
-                for (let i = 0; i < files.length; i++) {
-                    formData.append('documents[]', files[i]);
-                }
+                formData.append('document', file);
+                formData.append('title', title);
                 formData.append('_token', '{{ csrf_token() }}');
 
                 // Show loading state
@@ -357,9 +370,10 @@
                         if (data.status) {
                             Swal.fire('Success!', data.message, 'success');
                             fileInput.value = '';
+                            titleInput.value = '';
                             loadDocuments();
                         } else {
-                            Swal.fire('Error!', 'Failed to upload documents.', 'error');
+                            Swal.fire('Error!', 'Failed to upload document.', 'error');
                         }
                     })
                     .catch(err => {

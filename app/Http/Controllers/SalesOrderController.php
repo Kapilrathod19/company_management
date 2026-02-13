@@ -281,26 +281,26 @@ class SalesOrderController extends Controller
         $salesOrder = SalesOrder::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
-            'documents.*' => 'required|file|max:10240', // 10MB max per file
+            'document' => 'required|file|max:10240', // 10MB max per file
+            'title' => 'required|string|max:255',
         ]);
 
-        if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $file) {
-                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('sales_order_documents'), $fileName);
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('sales_order_documents'), $fileName);
 
-                SalesOrderDocument::create([
-                    'user_id' => auth()->id(),
-                    'sales_order_id' => $salesOrder->id,
-                    'title' => $file->getClientOriginalName(),
-                    'document' => $fileName,
-                ]);
-            }
+            SalesOrderDocument::create([
+                'user_id' => auth()->id(),
+                'sales_order_id' => $salesOrder->id,
+                'title' => $request->input('title'),
+                'document' => $fileName,
+            ]);
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Documents uploaded successfully'
+            'message' => 'Document uploaded successfully'
         ]);
     }
 
